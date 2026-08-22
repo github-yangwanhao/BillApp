@@ -2,39 +2,37 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/card_bg"
     android:orientation="horizontal"
-    android:gravity="center_vertical"
-    android:paddingStart="16dp"
-    android:paddingEnd="16dp"
-    android:paddingTop="12dp"
-    android:paddingBottom="12dp">
+    android:padding="16dp"
+    android:gravity="center_vertical">
 
-    <!-- 分类名称 -->
+    <!-- 左侧：分类名称（如"餐饮"） -->
     <TextView
         android:id="@+id/tv_category"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:textSize="15sp"
-        android:textColor="#333333" />
+        android:textSize="16sp"
+        android:textColor="#333333"
+        android:text="餐饮" />
 
-    <!-- 支付渠道 -->
+    <!-- 中间：支付渠道（如"微信"） -->
     <TextView
         android:id="@+id/tv_channel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="12sp"
+        android:layout_marginEnd="16dp"
+        android:textSize="14sp"
         android:textColor="#999999"
-        android:layout_marginEnd="12dp" />
+        android:text="微信" />
 
-    <!-- 金额 -->
+    <!-- 右侧：金额 -->
     <TextView
         android:id="@+id/tv_amount"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="15sp"
+        android:textSize="16sp"
         android:textStyle="bold"
-        android:textColor="@color/expense_color" />
+        android:text="-¥0.00" />
 
 </LinearLayout>

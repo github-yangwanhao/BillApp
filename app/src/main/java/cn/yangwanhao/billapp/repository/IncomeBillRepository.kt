@@ -38,4 +38,12 @@ class IncomeBillRepository(
     suspend fun getCategoryName(categoryId: Int): String {
         return dictDao.getById(categoryId.toLong())?.dictValue ?: "未知分类"
     }
+
+    suspend fun getBillsPaged(limit: Int, offset: Int): List<IncomeBill> {
+        return incomeBillDao.getBillsPaged(limit, offset)
+    }
+
+    suspend fun getTotalCount(): Int {
+        return incomeBillDao.getTotalCount()
+    }
 }

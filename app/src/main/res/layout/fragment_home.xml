@@ -10,114 +10,33 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <!-- 月份切换 + 汇总卡片 -->
-        <LinearLayout
+        <!-- 顶部 Tab 切换 -->
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tabLayout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="#FFFFFF"
-            android:elevation="2dp"
-            android:padding="16dp">
+            android:layout_height="72dp"
+            app:tabGravity="fill"
+            app:tabMode="fixed"
+            app:tabTextAppearance="@style/MyTabText"/>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
-
-                <ImageButton
-                    android:id="@+id/btn_prev_month"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:src="@android:drawable/ic_media_previous"
-                    android:contentDescription="上一月" />
-
-                <TextView
-                    android:id="@+id/tv_month"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:text="2026年8月" />
-
-                <ImageButton
-                    android:id="@+id/btn_next_month"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:src="@android:drawable/ic_media_next"
-                    android:contentDescription="下一月" />
-
-            </LinearLayout>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="本月支出"
-                android:textSize="13sp"
-                android:textColor="#888888"
-                android:layout_marginTop="8dp" />
-
-            <TextView
-                android:id="@+id/tv_month_total"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="¥0.00"
-                android:textSize="28sp"
-                android:textStyle="bold"
-                android:textColor="#D32F2F" />
-
-        </LinearLayout>
-
-        <!-- 账单列表 -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rv_bills"
+        <!-- 列表容器 -->
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/viewPager"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"
-            android:clipToPadding="false"
-            android:paddingBottom="80dp" />
-
+            android:layout_weight="1" />
     </LinearLayout>
 
-    <!-- 悬浮记账按钮组 -->
-    <LinearLayout
+    <!-- 右下角悬浮按钮 -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabAddBill"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="16dp"
-        android:orientation="vertical"
-        android:gravity="center">
-
-        <!-- 记支出按钮 -->
-        <Button
-            android:id="@+id/btn_add_consume"
-            android:layout_width="wrap_content"
-            android:layout_height="40dp"
-            android:background="@drawable/fab_bg"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            android:text="支出"
-            android:textColor="#FFFFFF"
-            android:textSize="14sp"
-            android:layout_marginBottom="8dp" />
-
-        <!-- 记收入按钮 -->
-        <Button
-            android:id="@+id/btn_add_income"
-            android:layout_width="wrap_content"
-            android:layout_height="40dp"
-            android:background="@drawable/fab_bg_income"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            android:text="收入"
-            android:textColor="#FFFFFF"
-            android:textSize="14sp" />
-
-    </LinearLayout>
+        android:layout_marginBottom="80dp"
+        app:fabCustomSize="96dp"
+        android:src="@drawable/ic_add"
+        app:tint="@android:color/white"
+        app:backgroundTint="#1976D2"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

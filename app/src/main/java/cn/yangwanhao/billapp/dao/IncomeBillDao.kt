@@ -41,4 +41,10 @@ interface IncomeBillDao {
     /** 按账单所属月份查询（权责发生制维度） */
     @Query("SELECT * FROM income_bill WHERE BILL_MONTH = :billMonth ORDER BY POST_DATE DESC, ID DESC")
     fun getByBillMonth(billMonth: Int): List<IncomeBill>
+
+    @Query("SELECT * FROM income_bill ORDER BY post_date DESC LIMIT :limit OFFSET :offset")
+    suspend fun getBillsPaged(limit: Int, offset: Int): List<IncomeBill>
+
+    @Query("SELECT COUNT(*) FROM income_bill")
+    suspend fun getTotalCount(): Int
 }

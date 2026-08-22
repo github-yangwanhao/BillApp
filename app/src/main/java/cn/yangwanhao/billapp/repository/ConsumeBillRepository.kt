@@ -48,4 +48,18 @@ class ConsumeBillRepository(
     suspend fun getChannelName(channelId: Int): String {
         return dictDao.getById(channelId.toLong())?.dictValue ?: "未知渠道"
     }
+
+    /**
+     * 分页查询支出账单
+     */
+    suspend fun getBillsPaged(limit: Int, offset: Int): List<ConsumeBill> {
+        return consumeBillDao.getBillsPaged(limit, offset)
+    }
+
+    /**
+     * 查询支出账单总数
+     */
+    suspend fun getTotalCount(): Int {
+        return consumeBillDao.getTotalCount()
+    }
 }

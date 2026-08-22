@@ -7,4 +7,7 @@
         <item name="colorSecondaryVariant">#E65100</item>
         <item name="colorOnSecondary">#FFFFFF</item>
     </style>
+    <style name="MyTabText" parent="TextAppearance.Design.Tab">
+        <item name="android:textSize">22sp</item>
+    </style>
 </resources>

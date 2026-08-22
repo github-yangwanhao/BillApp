@@ -4,9 +4,9 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import cn.yangwanhao.billapp.ui.fragment.HomeFragment
 import cn.yangwanhao.billapp.ui.fragment.StatsFragment
 import cn.yangwanhao.billapp.ui.fragment.ProfileFragment
+import cn.yangwanhao.billapp.ui.home.HomeFragment
 
 class MainActivity : AppCompatActivity() {
 

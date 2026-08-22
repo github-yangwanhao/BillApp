@@ -49,4 +49,18 @@ interface ConsumeBillDao {
     /** 按导入文件ID查询（用于查看某次导入的所有账单） */
     @Query("SELECT * FROM consume_bill WHERE IMPORT_FILE_ID = :importFileId ORDER BY PAY_DATE DESC")
     fun getByImportFileId(importFileId: Int): List<ConsumeBill>
+
+    /**
+     * 分页查询支出账单（按日期倒序）
+     * @param limit  每页取多少条
+     * @param offset 跳过前面多少条（第一页传0，第二页传20，第三页传40...）
+     */
+    @Query("SELECT * FROM consume_bill ORDER BY pay_date DESC LIMIT :limit OFFSET :offset")
+    suspend fun getBillsPaged(limit: Int, offset: Int): List<ConsumeBill>
+
+    /**
+     * 查询支出账单总数（用来判断是否还有下一页）
+     */
+    @Query("SELECT COUNT(*) FROM consume_bill")
+    suspend fun getTotalCount(): Int
 }
