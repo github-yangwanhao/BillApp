@@ -1,0 +1,22 @@
+<resources>
+    <string name="app_name">记账本</string>
+    <string name="tab_home">明细</string>
+    <string name="tab_stats">统计</string>
+    <string name="tab_mine">我的</string>
+    <string name="add_consume">记支出</string>
+    <string name="add_income">记收入</string>
+    <string name="monthly_expense">本月支出</string>
+    <string name="yuan_symbol">¥</string>
+    <string name="expense">支出</string>
+    <string name="income">收入</string>
+    <string name="all">全部</string>
+    <string name="query">查询</string>
+    <string name="export_内部技能">导出 Excel</string>
+    <string name="import_内部技能">导入 Excel</string>
+    <string name="backup_restore">备份与恢复</string>
+    <string name="category_manage">分类管理</string>
+    <string name="channel_manage">支付方式管理</string>
+    <string name="about">关于</string>
+    <string name="data_manage">数据管理</string>
+    <string name="basic_setting">基础设置</string>
+</resources>
