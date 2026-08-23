@@ -24,6 +24,10 @@ class ConsumeBillRepository(
         consumeBillDao.delete(bill)
     }
 
+    suspend fun deleteBillById(id: Long) {
+        consumeBillDao.deleteById(id)
+    }
+
     /** 查询某月所有消费账单 */
     suspend fun getBillsByMonth(month: Int): List<ConsumeBill> {
         return consumeBillDao.getByMonth(month)

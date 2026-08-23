@@ -1,5 +1,5 @@
 <resources>
-    <style name="Theme.BillApp" parent="Theme.MaterialComponents.Light.DarkActionBar">
+    <style name="Theme.BillApp" parent="Theme.MaterialComponents.Light.NoActionBar">
         <item name="colorPrimary">#1976D2</item>
         <item name="colorPrimaryVariant">#1565C0</item>
         <item name="colorOnPrimary">#FFFFFF</item>
@@ -9,5 +9,20 @@
     </style>
     <style name="MyTabText" parent="TextAppearance.Design.Tab">
         <item name="android:textSize">22sp</item>
+    </style>
+    <style name="ShapeAppearanceOverlay.Button.RoundedLeft" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSizeTopLeft">16dp</item>
+        <item name="cornerSizeBottomLeft">16dp</item>
+        <item name="cornerSizeTopRight">0dp</item>
+        <item name="cornerSizeBottomRight">0dp</item>
+    </style>
+
+    <style name="ShapeAppearanceOverlay.Button.RoundedRight" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSizeTopLeft">0dp</item>
+        <item name="cornerSizeBottomLeft">0dp</item>
+        <item name="cornerSizeTopRight">16dp</item>
+        <item name="cornerSizeBottomRight">16dp</item>
     </style>
 </resources>

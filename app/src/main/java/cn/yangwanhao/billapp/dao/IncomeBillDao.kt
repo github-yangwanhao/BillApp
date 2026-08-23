@@ -26,6 +26,9 @@ interface IncomeBillDao {
     @Delete
     fun delete(bill: IncomeBill)
 
+    @Query("DELETE FROM income_bill WHERE ID = :id")
+    suspend fun deleteById(id: Long)
+
     /** 根据ID查询单条 */
     @Query("SELECT * FROM income_bill WHERE ID = :id")
     fun getById(id: Long): IncomeBill?

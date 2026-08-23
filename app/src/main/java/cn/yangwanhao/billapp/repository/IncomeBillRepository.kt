@@ -24,6 +24,10 @@ class IncomeBillRepository(
         incomeBillDao.delete(bill)
     }
 
+    suspend fun deleteBillById(id: Long) {
+        incomeBillDao.deleteById(id)
+    }
+
     /** 查询某月所有收入账单 */
     suspend fun getBillsByMonth(month: Int): List<IncomeBill> {
         return incomeBillDao.getByMonth(month)

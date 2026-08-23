@@ -6,6 +6,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import cn.yangwanhao.billapp.BillApplication
+import cn.yangwanhao.billapp.common.Constant
 import cn.yangwanhao.billapp.common.DateUtil
 import cn.yangwanhao.billapp.entity.ConsumeBill
 import cn.yangwanhao.billapp.entity.IncomeBill
@@ -117,7 +118,8 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                     categoryName = categoryName,
                     channelName = channelName,
                     amount = bill.amount,
-                    isIncome = false
+                    isIncome = false,
+                    payDate = bill.payDate
                 )
             }
 
@@ -131,7 +133,8 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                     categoryName = categoryName,
                     channelName = "",
                     amount = bill.amount,
-                    isIncome = true
+                    isIncome = true,
+                    payDate = bill.postDate
                 )
             }
 
@@ -174,7 +177,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             // 消费分类
             val consumeCats = withContext(Dispatchers.IO) {
-                dictRepo.getConsumeCategories().map {
+                dictRepo.getAllDictValue(Constant.DICT_KEY_CONSUME_CATEGORY).map {
                     DictSpinnerAdapter.DictItem(it.id, it.dictValue)
                 }
             }
@@ -182,7 +185,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
 
             // 收入分类
             val incomeCats = withContext(Dispatchers.IO) {
-                dictRepo.getIncomeCategories().map {
+                dictRepo.getAllDictValue(Constant.DICT_KEY_INCOME_CATEGORY).map {
                     DictSpinnerAdapter.DictItem(it.id, it.dictValue)
                 }
             }
@@ -190,7 +193,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
 
             // 支付渠道
             val channels = withContext(Dispatchers.IO) {
-                dictRepo.getPayChannels().map {
+                dictRepo.getAllDictValue(Constant.DICT_KEY_PAY_CHANNEL).map {
                     DictSpinnerAdapter.DictItem(it.id, it.dictValue)
                 }
             }
@@ -198,71 +201,4 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    /** 新增一笔消费账单 */
-    fun addConsumeBill(
-        amount: Int,
-        categoryId: Int,
-        payChannelId: Int,
-        remark: String
-    ) {
-        viewModelScope.launch {
-            val now = System.currentTimeMillis()
-            val sdf = java.text.SimpleDateFormat("yyyyMMdd", java.util.Locale.getDefault())
-            val dateInt = sdf.format(java.util.Date(now)).toInt()
-            val monthInt = _currentMonth.value ?: DateUtil.getCurrentMonthInt()
-
-            val bill = ConsumeBill(
-                amount = amount,
-                categoryId = categoryId,
-                payChannelId = payChannelId,
-                payDate = dateInt,
-                billMonth = monthInt,
-                remark = remark,
-                billKind = "NORMAL",
-                createTime = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date(now))
-            )
-
-            withContext(Dispatchers.IO) {
-                consumeBillRepo.addBill(bill)
-            }
-
-            _toastMessage.value = "支出已记录"
-            loadBills() // 刷新列表
-        }
-    }
-
-    /** 新增一笔收入账单 */
-    fun addIncomeBill(
-        amount: Int,
-        categoryId: Int,
-        remark: String
-    ) {
-        viewModelScope.launch {
-            val now = System.currentTimeMillis()
-            val sdf = java.text.SimpleDateFormat("yyyyMMdd", java.util.Locale.getDefault())
-            val dateInt = sdf.format(java.util.Date(now)).toInt()
-            val monthInt = _currentMonth.value ?: DateUtil.getCurrentMonthInt()
-
-            val bill = IncomeBill(
-                amount = amount,
-                categoryId = categoryId,
-                postDate = dateInt,
-                billMonth = monthInt,
-                remark = remark,
-                createTime = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date(now))
-            )
-
-            withContext(Dispatchers.IO) {
-                incomeBillRepo.addBill(bill)
-            }
-
-            _toastMessage.value = "收入已记录"
-            loadBills() // 刷新列表
-        }
-    }
-
-    /** 消费提示消息已被读取 */
-    fun onToastConsumed() {
-        _toastMessage.value = null
-    }
 }

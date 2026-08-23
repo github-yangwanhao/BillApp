@@ -64,5 +64,7 @@ dependencies {
     implementation("androidx.fragment:fragment-ktx:1.3.0")
     // Kotlin 的 ViewModel 扩展库（包含 viewModelScope 等功能）
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
 
+    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
 }

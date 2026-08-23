@@ -26,6 +26,9 @@ interface ConsumeBillDao {
     @Delete
     fun delete(bill: ConsumeBill)
 
+    @Query("DELETE FROM consume_bill WHERE ID = :id")
+    suspend fun deleteById(id: Long)
+
     /** 根据ID查询单条 */
     @Query("SELECT * FROM consume_bill WHERE ID = :id")
     fun getById(id: Long): ConsumeBill?
@@ -55,7 +58,7 @@ interface ConsumeBillDao {
      * @param limit  每页取多少条
      * @param offset 跳过前面多少条（第一页传0，第二页传20，第三页传40...）
      */
-    @Query("SELECT * FROM consume_bill ORDER BY pay_date DESC LIMIT :limit OFFSET :offset")
+    @Query("SELECT * FROM consume_bill ORDER BY bill_month DESC, pay_date DESC, create_time DESC LIMIT :limit OFFSET :offset")
     suspend fun getBillsPaged(limit: Int, offset: Int): List<ConsumeBill>
 
     /**

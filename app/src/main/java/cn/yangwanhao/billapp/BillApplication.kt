@@ -1,6 +1,8 @@
 package cn.yangwanhao.billapp
 
 import android.app.Application
+import android.content.Context
+import android.content.res.Configuration
 import cn.yangwanhao.billapp.database.BillDatabase
 import cn.yangwanhao.billapp.database.DatabaseInitHelper
 import cn.yangwanhao.billapp.repository.ConsumeBillRepository
@@ -8,6 +10,7 @@ import cn.yangwanhao.billapp.repository.DictRepository
 import cn.yangwanhao.billapp.repository.IncomeBillRepository
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
+import java.util.Locale
 
 class BillApplication : Application() {
 
@@ -32,5 +35,26 @@ class BillApplication : Application() {
         MainScope().launch {
             initHelper.initDatabaseIfNeeded()
         }
+    }
+
+    override fun attachBaseContext(base: Context?) {
+        super.attachBaseContext(updateLanguage(base!!))
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        // 配置变化时保持语言不变
+        updateLanguage(baseContext)
+    }
+
+    /**
+     * 强制将 Context 的语言设置为简体中文
+     */
+    private fun updateLanguage(context: Context): Context {
+        val config = Configuration(context.resources.configuration)
+        // 简体中文
+        config.setLocale(Locale.CHINA)
+        // 如果希望繁体中文，用 Locale.TAIWAN
+        return context.createConfigurationContext(config)
     }
 }

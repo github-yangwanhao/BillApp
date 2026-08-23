@@ -6,6 +6,8 @@ object Constant {
     const val DICT_KEY_CONSUME_CATEGORY = "CONSUME_CATEGORY"
     const val DICT_KEY_INCOME_CATEGORY = "INCOME_CATEGORY"
     const val DICT_KEY_PAY_CHANNEL = "PAY_CHANNEL"
+    const val DICT_KEY_CONSUME_REMARK = "CONSUME_REMARK"
+    const val DICT_KEY_INCOME_REMARK = "INCOME_REMARK"
 
     // ==================== 字典状态 ====================
     const val STATUS_ENABLE = "1"

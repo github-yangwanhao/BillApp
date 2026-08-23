@@ -3,12 +3,13 @@ package cn.yangwanhao.billapp
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import cn.yangwanhao.billapp.base.BaseActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import cn.yangwanhao.billapp.ui.fragment.StatsFragment
 import cn.yangwanhao.billapp.ui.fragment.ProfileFragment
 import cn.yangwanhao.billapp.ui.home.HomeFragment
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : BaseActivity() {
 
     // 三个 Fragment 实例
     private val homeFragment = HomeFragment()

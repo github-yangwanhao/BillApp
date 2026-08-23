@@ -52,7 +52,7 @@ class DatabaseInitHelper(
             dictDao.insertAll(incomeDicts)
 
             // 3. 默认支付渠道
-            val payChannels = listOf("微信", "支付宝", "银行卡", "信用卡", "现金", "其他")
+            val payChannels = listOf("支付宝", "微信", "银行卡", "信用卡", "现金", "其他")
             val payChannelDicts = payChannels.mapIndexed { index, value ->
                 Dict(
                     dictKey = Constant.DICT_KEY_PAY_CHANNEL,
@@ -62,6 +62,31 @@ class DatabaseInitHelper(
                 )
             }
             dictDao.insertAll(payChannelDicts)
+
+            // 4. 默认消费备注
+            val consumeRemark = listOf("午饭", "晚饭", "地铁", "早饭", "叮咚买菜", "话费充值", "美团买药",
+                "美团买菜", "餐厅充值", "火车票", "鸡蛋")
+            val consumeRemarkDicts = consumeRemark.mapIndexed { index, value ->
+                Dict(
+                    dictKey = Constant.DICT_KEY_CONSUME_REMARK,
+                    dictValue = value,
+                    sort = index,
+                    status = Constant.STATUS_ENABLE
+                )
+            }
+            dictDao.insertAll(consumeRemarkDicts)
+
+            // 5. 默认收入备注
+            val incomeRemark = listOf("工资", "奖金")
+            val incomeRemarkDicts = incomeRemark.mapIndexed { index, value ->
+                Dict(
+                    dictKey = Constant.DICT_KEY_INCOME_REMARK,
+                    dictValue = value,
+                    sort = index,
+                    status = Constant.STATUS_ENABLE
+                )
+            }
+            dictDao.insertAll(incomeRemarkDicts)
 
             setInitialized()
         }

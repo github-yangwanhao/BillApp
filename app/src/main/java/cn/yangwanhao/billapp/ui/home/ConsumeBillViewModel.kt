@@ -8,7 +8,10 @@ import androidx.lifecycle.viewModelScope
 import cn.yangwanhao.billapp.database.BillDatabase
 import cn.yangwanhao.billapp.entity.ConsumeBill
 import cn.yangwanhao.billapp.repository.ConsumeBillRepository
+import cn.yangwanhao.billapp.ui.adapter.BillListAdapter
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class ConsumeBillViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -16,85 +19,135 @@ class ConsumeBillViewModel(application: Application) : AndroidViewModel(applicat
     private val consumeBillDao = database.consumeBillDao()
     private val dictDao = database.dictDao()
     private val repository = ConsumeBillRepository(consumeBillDao, dictDao)
+    private val _isLoadingMore = MutableLiveData(false)
+    val isLoadingMore: LiveData<Boolean> = _isLoadingMore
 
     // ========== 分页相关 ==========
-
-    /** 每页加载多少条 */
     private val pageSize = 20
-
-    /** 当前已加载到第几页（从0开始） */
     private var currentPage = 0
-
-    /** 是否正在加载中（防止重复请求） */
     private var isLoading = false
-
-    /** 是否已经加载完所有数据 */
     private var isAllLoaded = false
 
-    /** 已加载的所有账单数据（不断累加） */
-    private val _bills = MutableLiveData<MutableList<ConsumeBill>>(mutableListOf())
-    val bills: LiveData<MutableList<ConsumeBill>> = _bills
+    // ========== 原始数据（用于分页累加） ==========
+    private val _rawBills = mutableListOf<ConsumeBill>()
 
-    /** 是否还有更多数据 */
+    // ========== 转换后的 Adapter 数据 ==========
+    // 🔥 初始值设为 null，区分“未加载”和“已加载为空”
+    private val _adapterItems = MutableLiveData<List<Any>?>(null)
+    val adapterItems: LiveData<List<Any>?> = _adapterItems
+
     private val _hasMore = MutableLiveData(true)
     val hasMore: LiveData<Boolean> = _hasMore
 
     /**
-     * 加载第一页（首次进入页面时调用）
+     * 加载第一页
      */
     fun loadFirstPage() {
         currentPage = 0
         isAllLoaded = false
-        _bills.value = mutableListOf()
+        _rawBills.clear()
+        // 🔥 先设置为 null，表示正在加载
+        _adapterItems.value = null
         loadNextPage()
     }
 
-    /**
-     * 加载下一页（用户滑到底部时调用）
-     */
     fun loadNextPage() {
-        // 如果正在加载或已全部加载完，就直接返回
+        // 如果正在加载 或 已全部加载，则直接返回
         if (isLoading || isAllLoaded) return
 
         isLoading = true
+        _isLoadingMore.value = true
         viewModelScope.launch {
-            val offset = currentPage * pageSize
-            val newList = repository.getBillsPaged(pageSize, offset)
+            try {
+                val offset = currentPage * pageSize
+                val newBills = repository.getBillsPaged(pageSize, offset)
 
-            // 把新数据追加到已有列表后面
-            val currentList = _bills.value ?: mutableListOf()
-            currentList.addAll(newList)
-            _bills.value = currentList
+                _rawBills.addAll(newBills)
 
-            // 如果返回的数据不足一页，说明没有更多了
-            if (newList.size < pageSize) {
-                isAllLoaded = true
-                _hasMore.value = false
+                // 🔥 判断是否已全部加载
+                if (newBills.size < pageSize) {
+                    isAllLoaded = true
+                    _hasMore.value = false
+                } else {
+                    _hasMore.value = true
+                }
+
+                // 转换数据
+                val items = withContext(Dispatchers.IO) {
+                    convertToAdapterItems(_rawBills, isLoading)
+                }
+                // 🔥 使用 postValue 确保在主线程更新
+                _adapterItems.postValue(items)
+
+                currentPage++
+            } catch (e: Exception) {
+                e.printStackTrace()
+                // 🔥 出错时也返回空列表
+                _adapterItems.postValue(emptyList())
+            } finally {
+                isLoading = false
+                _isLoadingMore.value = false
             }
-
-            currentPage++
-            isLoading = false
         }
     }
 
-    /**
-     * 新增一条支出账单后，重新从第一页开始加载
-     */
-    fun insert(bill: ConsumeBill) {
-        viewModelScope.launch {
-            repository.addBill(bill)
-            // 插入成功后，重新加载第一页
-            loadFirstPage()
+    private suspend fun convertToAdapterItems(
+        bills: List<ConsumeBill>,
+        isLoading: Boolean
+    ): List<Any> {
+        if (bills.isEmpty()) return emptyList()
+
+        val items = mutableListOf<Any>()
+        var lastDate = 0
+        val sortedBills = bills.sortedByDescending { it.payDate }
+
+        for (bill in sortedBills) {
+            val categoryName = repository.getCategoryName(bill.categoryId)
+            val channelName = repository.getChannelName(bill.payChannelId)
+
+            val billItem = BillListAdapter.BillItem(
+                id = bill.id,
+                categoryName = categoryName,
+                channelName = channelName,
+                amount = bill.amount,
+                isIncome = false,
+                remark = bill.remark,
+                payDate = bill.payDate
+            )
+
+            if (bill.payDate != lastDate) {
+                val dayTotal = repository.getDayTotal(bill.payDate)
+                items.add(BillListAdapter.DateHeader(bill.payDate, dayTotal))
+                lastDate = bill.payDate
+            }
+            items.add(billItem)
         }
+
+        // 🔥 根据状态追加底部占位
+        if (_hasMore.value == true) {
+            // 还有更多数据 → 显示加载中
+            items.add(BillListAdapter.LoadingPlaceholder(isLoading = true))
+        } else if (bills.isNotEmpty()) {
+            // 已全部加载完成 → 显示“已加载全部”
+            items.add(BillListAdapter.LoadingPlaceholder(isLoading = false))
+        }
+        // 如果 bills 为空，不显示任何占位
+
+        return items
     }
 
     /**
-     * 删除一条支出账单
+     * 刷新列表（保存/删除后调用）
      */
-    fun delete(bill: ConsumeBill) {
+    fun refresh() {
+        loadFirstPage()
+    }
+
+    // 新增删除方法
+    fun deleteBill(billId: Long) {
         viewModelScope.launch {
-            repository.deleteBill(bill)
-            loadFirstPage()
+            repository.deleteBillById(billId)
+            refresh()
         }
     }
 }
