@@ -66,4 +66,9 @@ class ConsumeBillRepository(
     suspend fun getTotalCount(): Int {
         return consumeBillDao.getTotalCount()
     }
+
+    /** 批量插入账单 */
+    suspend fun insertAll(bills: List<ConsumeBill>) {
+        consumeBillDao.insertAll(bills)
+    }
 }

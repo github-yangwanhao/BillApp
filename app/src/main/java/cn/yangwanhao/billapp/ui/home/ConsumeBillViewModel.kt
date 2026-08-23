@@ -28,31 +28,25 @@ class ConsumeBillViewModel(application: Application) : AndroidViewModel(applicat
     private var isLoading = false
     private var isAllLoaded = false
 
-    // ========== 原始数据（用于分页累加） ==========
+    // ========== 原始数据 ==========
     private val _rawBills = mutableListOf<ConsumeBill>()
 
     // ========== 转换后的 Adapter 数据 ==========
-    // 🔥 初始值设为 null，区分“未加载”和“已加载为空”
     private val _adapterItems = MutableLiveData<List<Any>?>(null)
     val adapterItems: LiveData<List<Any>?> = _adapterItems
 
     private val _hasMore = MutableLiveData(true)
     val hasMore: LiveData<Boolean> = _hasMore
 
-    /**
-     * 加载第一页
-     */
     fun loadFirstPage() {
         currentPage = 0
         isAllLoaded = false
         _rawBills.clear()
-        // 🔥 先设置为 null，表示正在加载
         _adapterItems.value = null
         loadNextPage()
     }
 
     fun loadNextPage() {
-        // 如果正在加载 或 已全部加载，则直接返回
         if (isLoading || isAllLoaded) return
 
         isLoading = true
@@ -64,7 +58,6 @@ class ConsumeBillViewModel(application: Application) : AndroidViewModel(applicat
 
                 _rawBills.addAll(newBills)
 
-                // 🔥 判断是否已全部加载
                 if (newBills.size < pageSize) {
                     isAllLoaded = true
                     _hasMore.value = false
@@ -72,17 +65,14 @@ class ConsumeBillViewModel(application: Application) : AndroidViewModel(applicat
                     _hasMore.value = true
                 }
 
-                // 转换数据
                 val items = withContext(Dispatchers.IO) {
                     convertToAdapterItems(_rawBills, isLoading)
                 }
-                // 🔥 使用 postValue 确保在主线程更新
                 _adapterItems.postValue(items)
 
                 currentPage++
             } catch (e: Exception) {
                 e.printStackTrace()
-                // 🔥 出错时也返回空列表
                 _adapterItems.postValue(emptyList())
             } finally {
                 isLoading = false
@@ -91,6 +81,10 @@ class ConsumeBillViewModel(application: Application) : AndroidViewModel(applicat
         }
     }
 
+    /**
+     * 将 ConsumeBill 列表转换为 DateHeader + BillItem 混合列表
+     * 🔥 核心改动：按 billMonth 分组（权责发生制）
+     */
     private suspend fun convertToAdapterItems(
         bills: List<ConsumeBill>,
         isLoading: Boolean
@@ -98,8 +92,15 @@ class ConsumeBillViewModel(application: Application) : AndroidViewModel(applicat
         if (bills.isEmpty()) return emptyList()
 
         val items = mutableListOf<Any>()
-        var lastDate = 0
-        val sortedBills = bills.sortedByDescending { it.payDate }
+
+        val sortedBills = bills.sortedWith(
+            compareByDescending<ConsumeBill> { it.billMonth }
+                .thenByDescending { it.payDate }
+        )
+
+        var lastMonth = 0
+        var monthTotal = 0
+        var monthBills = mutableListOf<BillListAdapter.BillItem>()
 
         for (bill in sortedBills) {
             val categoryName = repository.getCategoryName(bill.categoryId)
@@ -112,38 +113,59 @@ class ConsumeBillViewModel(application: Application) : AndroidViewModel(applicat
                 amount = bill.amount,
                 isIncome = false,
                 remark = bill.remark,
-                payDate = bill.payDate
+                payDate = bill.payDate,
+                billMonth = bill.billMonth,
+                isFirstInDay = false  // 稍后标记
             )
 
-            if (bill.payDate != lastDate) {
-                val dayTotal = repository.getDayTotal(bill.payDate)
-                items.add(BillListAdapter.DateHeader(bill.payDate, dayTotal))
-                lastDate = bill.payDate
+            if (bill.billMonth != lastMonth && lastMonth != 0) {
+                // 🔥 标记当月每天第一条
+                markFirstInDay(monthBills)
+                items.add(BillListAdapter.MonthHeader(lastMonth, monthTotal))
+                items.addAll(monthBills)
+                monthBills = mutableListOf()
+                monthTotal = 0
             }
-            items.add(billItem)
+
+            lastMonth = bill.billMonth
+            monthTotal += bill.amount
+            monthBills.add(billItem)
         }
 
-        // 🔥 根据状态追加底部占位
+        if (lastMonth != 0) {
+            markFirstInDay(monthBills)
+            items.add(BillListAdapter.MonthHeader(lastMonth, monthTotal))
+            items.addAll(monthBills)
+        }
+
         if (_hasMore.value == true) {
-            // 还有更多数据 → 显示加载中
             items.add(BillListAdapter.LoadingPlaceholder(isLoading = true))
         } else if (bills.isNotEmpty()) {
-            // 已全部加载完成 → 显示“已加载全部”
             items.add(BillListAdapter.LoadingPlaceholder(isLoading = false))
         }
-        // 如果 bills 为空，不显示任何占位
 
         return items
     }
 
     /**
-     * 刷新列表（保存/删除后调用）
+     * 标记每天的第一条账单
      */
+    private fun markFirstInDay(bills: MutableList<BillListAdapter.BillItem>) {
+        if (bills.isEmpty()) return
+        var lastPayDate = 0
+        for (bill in bills) {
+            if (bill.payDate != lastPayDate) {
+                // 新的一天
+                bill.isFirstInDay = true
+                lastPayDate = bill.payDate
+            }
+        }
+    }
+
     fun refresh() {
         loadFirstPage()
     }
 
-    // 新增删除方法
     fun deleteBill(billId: Long) {
         viewModelScope.launch {
             repository.deleteBillById(billId)

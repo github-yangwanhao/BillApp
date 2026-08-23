@@ -25,7 +25,7 @@ data class IncomeBill(
 
     /** 账单所属月份，yyyyMM 格式整数 */
     @ColumnInfo(name = "BILL_MONTH")
-    val billMonth: Int?,
+    val billMonth: Int,
 
     /** 账单备注 */
     @ColumnInfo(name = "REMARK")

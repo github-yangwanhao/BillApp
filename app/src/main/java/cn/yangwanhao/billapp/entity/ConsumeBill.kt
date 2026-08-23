@@ -29,7 +29,7 @@ data class ConsumeBill(
 
     /** 账单所属月份，yyyyMM 格式整数 */
     @ColumnInfo(name = "BILL_MONTH")
-    val billMonth: Int?,
+    val billMonth: Int,
 
     /** 账单备注 */
     @ColumnInfo(name = "REMARK")
@@ -41,7 +41,7 @@ data class ConsumeBill(
 
     /** 导入文件ID，关联 import_file_his.ID */
     @ColumnInfo(name = "IMPORT_FILE_ID")
-    val importFileId: Int? = null,
+    val importFileId: Int?,
 
     /** 创建时间 */
     @ColumnInfo(name = "CREATE_TIME")

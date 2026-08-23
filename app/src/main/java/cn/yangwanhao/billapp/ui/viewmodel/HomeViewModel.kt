@@ -119,7 +119,8 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                     channelName = channelName,
                     amount = bill.amount,
                     isIncome = false,
-                    payDate = bill.payDate
+                    payDate = bill.payDate,
+                    billMonth = bill.billMonth
                 )
             }
 
@@ -134,7 +135,8 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                     channelName = "",
                     amount = bill.amount,
                     isIncome = true,
-                    payDate = bill.postDate
+                    payDate = bill.postDate,
+                    billMonth = bill.billMonth
                 )
             }
 
@@ -162,7 +164,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                     val dayTotal = withContext(Dispatchers.IO) {
                         consumeBillRepo.getDayTotal(dateInt)
                     }
-                    allItems.add(BillListAdapter.DateHeader(dateInt, dayTotal))
+                    allItems.add(BillListAdapter.MonthHeader(dateInt, dayTotal))
                     lastDate = dateInt
                 }
                 allItems.add(billItem)

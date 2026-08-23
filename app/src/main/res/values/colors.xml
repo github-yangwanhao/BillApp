@@ -6,4 +6,5 @@
     <color name="divider">#E0E0E0</color>
     <color name="fab_bg">#1976D2</color>
     <color name="colorAccent">#388E3C</color>
+    <color name="colorCancel">#E8F5E9</color>
 </resources>

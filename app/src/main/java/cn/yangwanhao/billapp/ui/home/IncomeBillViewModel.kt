@@ -22,17 +22,13 @@ class IncomeBillViewModel(application: Application) : AndroidViewModel(applicati
     private val _isLoadingMore = MutableLiveData(false)
     val isLoadingMore: LiveData<Boolean> = _isLoadingMore
 
-    // ========== 分页相关 ==========
     private val pageSize = 20
     private var currentPage = 0
     private var isLoading = false
     private var isAllLoaded = false
 
-    // ========== 原始数据 ==========
     private val _rawBills = mutableListOf<IncomeBill>()
 
-    // ========== 转换后的 Adapter 数据 ==========
-    // 🔥 初始值设为 null，而不是 emptyList，方便观察者区分“未加载”和“已加载为空”
     private val _adapterItems = MutableLiveData<List<Any>?>(null)
     val adapterItems: LiveData<List<Any>?> = _adapterItems
 
@@ -43,7 +39,6 @@ class IncomeBillViewModel(application: Application) : AndroidViewModel(applicati
         currentPage = 0
         isAllLoaded = false
         _rawBills.clear()
-        // 🔥 先设置为 null，表示正在加载
         _adapterItems.value = null
         loadNextPage()
     }
@@ -70,13 +65,11 @@ class IncomeBillViewModel(application: Application) : AndroidViewModel(applicati
                 val items = withContext(Dispatchers.IO) {
                     convertToAdapterItems(_rawBills, isLoading)
                 }
-                // 🔥 使用 postValue 确保在主线程更新
                 _adapterItems.postValue(items)
 
                 currentPage++
             } catch (e: Exception) {
                 e.printStackTrace()
-                // 🔥 出错时也返回空列表
                 _adapterItems.postValue(emptyList())
             } finally {
                 isLoading = false
@@ -85,6 +78,9 @@ class IncomeBillViewModel(application: Application) : AndroidViewModel(applicati
         }
     }
 
+    /**
+     * 收入账单同样按 billMonth 分组
+     */
     private suspend fun convertToAdapterItems(
         bills: List<IncomeBill>,
         isLoading: Boolean
@@ -92,8 +88,16 @@ class IncomeBillViewModel(application: Application) : AndroidViewModel(applicati
         if (bills.isEmpty()) return emptyList()
 
         val items = mutableListOf<Any>()
-        var lastDate = 0
-        val sortedBills = bills.sortedByDescending { it.postDate }
+
+        // 按 billMonth 降序，再按 postDate 降序
+        val sortedBills = bills.sortedWith(
+            compareByDescending<IncomeBill> { it.billMonth }
+                .thenByDescending { it.postDate }
+        )
+
+        var lastMonth = 0
+        var monthTotal = 0
+        var monthBills = mutableListOf<BillListAdapter.BillItem>()
 
         for (bill in sortedBills) {
             val categoryName = repository.getCategoryName(bill.categoryId)
@@ -105,17 +109,33 @@ class IncomeBillViewModel(application: Application) : AndroidViewModel(applicati
                 amount = bill.amount,
                 isIncome = true,
                 remark = "",
-                payDate = bill.postDate
+                payDate = bill.postDate,
+                billMonth = bill.billMonth ?: 0
             )
 
-            if (bill.postDate != lastDate) {
-                items.add(BillListAdapter.DateHeader(bill.postDate, 0))
-                lastDate = bill.postDate
+            if (bill.billMonth != lastMonth && lastMonth != 0) {
+                items.add(BillListAdapter.MonthHeader(
+                    monthInt = lastMonth,
+                    monthTotal = monthTotal
+                ))
+                items.addAll(monthBills)
+                monthBills = mutableListOf()
+                monthTotal = 0
             }
-            items.add(billItem)
+
+            lastMonth = bill.billMonth
+            monthTotal += bill.amount
+            monthBills.add(billItem)
         }
 
-        // 🔥 根据状态追加底部占位
+        if (lastMonth != 0) {
+            items.add(BillListAdapter.MonthHeader(
+                monthInt = lastMonth,
+                monthTotal = monthTotal
+            ))
+            items.addAll(monthBills)
+        }
+
         if (_hasMore.value == true) {
             items.add(BillListAdapter.LoadingPlaceholder(isLoading = true))
         } else if (bills.isNotEmpty()) {

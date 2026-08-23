@@ -4,11 +4,11 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="16dp"
     android:background="@drawable/bottom_sheet_rounded_top"
-    android:elevation="8dp">
+    android:elevation="8dp"
+    android:padding="16dp">
 
-    <!-- ========== 顶部标题 ========== -->
+    <!-- 顶部标题 -->
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -17,165 +17,278 @@
         android:textStyle="bold"
         android:textColor="@android:color/black"
         android:gravity="center"
-        android:paddingBottom="16dp" />
+        android:paddingBottom="12dp" />
 
-    <!-- ========== 金额（hint=消费金额，默认显示0） ========== -->
-    <com.google.android.material.textfield.TextInputLayout
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="消费金额"
-        app:prefixText="¥ "
-        android:layout_marginBottom="12dp">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/etAmount"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="numberDecimal"
-            android:textSize="16sp"
-            android:maxLength="10"
-            android:text="0" />
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <!-- ========== 日期 ========== -->
-    <com.google.android.material.textfield.TextInputLayout
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="消费日期"
-        app:endIconMode="custom"
-        app:endIconDrawable="@drawable/ic_calendar"
-        android:layout_marginBottom="12dp">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/etDate"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="none"
-            android:focusable="false"
-            android:clickable="true"
-            android:focusableInTouchMode="false"
-            android:textSize="16sp" />
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <!-- ========== 分类 ========== -->
-    <com.google.android.material.textfield.TextInputLayout
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="消费分类"
-        app:endIconMode="custom"
-        app:endIconDrawable="@drawable/ic_arrow_down"
-        android:layout_marginBottom="12dp">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/etCategory"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="none"
-            android:focusable="false"
-            android:clickable="true"
-            android:focusableInTouchMode="false"
-            android:textSize="16sp" />
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <!-- ========== 支付方式 ========== -->
-    <com.google.android.material.textfield.TextInputLayout
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="支付方式"
-        app:endIconMode="custom"
-        app:endIconDrawable="@drawable/ic_arrow_down"
-        android:layout_marginBottom="12dp">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/etPayChannel"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="none"
-            android:focusable="false"
-            android:clickable="true"
-            android:focusableInTouchMode="false"
-            android:textSize="16sp" />
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <!-- ========== 备注（独立输入框，无灰色背景包裹） ========== -->
-    <com.google.android.material.textfield.TextInputLayout
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="消费备注"
-        android:layout_marginBottom="8dp">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/etRemark"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="text"
-            android:maxLines="3"
-            android:textSize="16sp"
-            android:text="请输入或选择备注"/>
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <!-- ========== 备注快捷标签（只有标签本身是灰色背景） ========== -->
-    <HorizontalScrollView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:scrollbars="none">
-
-        <LinearLayout
-            android:id="@+id/llRemarkTags"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="4dp" />
-    </HorizontalScrollView>
-
-    <!-- ========== 底部按钮（加高到 80dp） ========== -->
+    <!-- ========== 普通/分期切换（放在金额上方） ========== -->
+    <!-- ========== 普通/分期切换（手动控制） ========== -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginTop="4dp"
-        android:background="@drawable/bottom_button_rounded"
-        android:clipToOutline="true">
+        android:layout_marginBottom="12dp">
 
-        <!-- 取消按钮（灰色背景） -->
+        <!-- 常规按钮 -->
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnCancel"
+            android:id="@+id/btnNormalMode"
+            style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="4dp"
+            android:text="常规"
+            android:textSize="16sp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            app:cornerRadius="8dp"
+            android:backgroundTint="#E8E8E8"
+            android:textColor="#333333" />
+
+        <!-- 分期按钮 -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnInstallmentMode"
+            style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_weight="1"
+            android:layout_marginStart="4dp"
+            android:text="分期"
+            android:textSize="16sp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            app:cornerRadius="8dp"
+            android:backgroundTint="#FFFFFF"
+            android:textColor="#999999" />
+
+    </LinearLayout>
+
+    <!-- ========== 可滚动内容 ========== -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- 金额 -->
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="消费金额"
+                app:prefixText="¥ "
+                android:layout_marginBottom="12dp">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etAmount"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="numberDecimal"
+                    android:textSize="16sp"
+                    android:maxLength="10"
+                    android:text="0" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- ========== 分期参数（默认隐藏） ========== -->
+            <LinearLayout
+                android:id="@+id/installmentParams"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:visibility="gone"
+                android:layout_marginBottom="12dp">
+
+                <!-- 期数 -->
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="8dp"
+                    android:hint="期数">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etInstallmentCount"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="number"
+                        android:textSize="16sp"
+                        android:text="0" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- 开始月份 -->
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="8dp"
+                    android:hint="开始月份"
+                    app:endIconMode="custom"
+                    app:endIconDrawable="@drawable/ic_calendar">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etStartMonth"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="none"
+                        android:focusable="false"
+                        android:clickable="true"
+                        android:focusableInTouchMode="false"
+                        android:textSize="16sp" />
+                </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
+
+            <!-- ========== 分期预览列表 ========== -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvInstallmentPreview"
+                android:layout_width="match_parent"
+                android:layout_height="150dp"
+                android:scrollbars="vertical"
+                android:visibility="gone"
+                android:background="@drawable/card_light_gray"
+                android:padding="4dp"
+                android:layout_marginBottom="12dp"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+
+            <!-- ========== 日期（普通模式用） ========== -->
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="消费日期"
+                app:endIconMode="custom"
+                app:endIconDrawable="@drawable/ic_calendar"
+                android:layout_marginBottom="12dp"
+                android:id="@+id/dateLayout">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etDate"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="none"
+                    android:focusable="false"
+                    android:clickable="true"
+                    android:focusableInTouchMode="false"
+                    android:textSize="16sp" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- ========== 分类 ========== -->
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="消费分类"
+                app:endIconMode="custom"
+                app:endIconDrawable="@drawable/ic_arrow_down"
+                android:layout_marginBottom="12dp">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etCategory"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="none"
+                    android:focusable="false"
+                    android:clickable="true"
+                    android:focusableInTouchMode="false"
+                    android:textSize="16sp" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- ========== 支付方式 ========== -->
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="支付方式"
+                app:endIconMode="custom"
+                app:endIconDrawable="@drawable/ic_arrow_down"
+                android:layout_marginBottom="12dp">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etPayChannel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="none"
+                    android:focusable="false"
+                    android:clickable="true"
+                    android:focusableInTouchMode="false"
+                    android:textSize="16sp" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- ========== 备注（普通模式显示） ========== -->
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="支出备注"
+                android:layout_marginBottom="8dp"
+                android:id="@+id/remarkLayout">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etRemark"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="text"
+                    android:maxLines="3"
+                    android:textSize="16sp"
+                    android:text="请输入或选择备注"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- ========== 备注快捷标签 ========== -->
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:scrollbars="none">
+
+                <LinearLayout
+                    android:id="@+id/llRemarkTags"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="4dp" />
+            </HorizontalScrollView>
+
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- ========== 底部按钮（固定在底部） ========== -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="12dp"
+        android:paddingTop="8dp"
+        android:background="@android:color/white">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/tvCancel"
             style="@style/Widget.MaterialComponents.Button"
             android:layout_width="0dp"
             android:layout_height="80dp"
             android:layout_weight="1"
             android:text="取消"
-            android:textSize="18sp"
-            android:textColor="#666666"
-            android:backgroundTint="#F5F5F5"
+            android:textSize="20sp"
+            android:textColor="#388E3C"
+            android:backgroundTint="@color/colorCancel"
             app:cornerRadius="0dp"
-            app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.Button.RoundedLeft" />
+            android:clickable="true"
+            android:focusable="true" />
 
-        <!-- 分割线 -->
-        <View
-            android:layout_width="1dp"
-            android:layout_height="match_parent"
-            android:background="#E0E0E0" />
-
-        <!-- 保存按钮（主色） -->
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnSave"
+            android:id="@+id/tvSave"
             style="@style/Widget.MaterialComponents.Button"
             android:layout_width="0dp"
             android:layout_height="80dp"
             android:layout_weight="1"
             android:text="保存"
-            android:textSize="18sp"
+            android:textSize="20sp"
             android:textColor="#FFFFFF"
             android:backgroundTint="@color/colorAccent"
-            app:cornerRadius="0dp"
-            app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.Button.RoundedRight" />
+            app:cornerRadius="8dp" />
     </LinearLayout>
 
 </LinearLayout>
