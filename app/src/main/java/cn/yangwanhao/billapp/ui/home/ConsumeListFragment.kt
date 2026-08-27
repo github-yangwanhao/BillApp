@@ -134,9 +134,25 @@ class ConsumeListFragment : Fragment() {
     //  长按删除
     // ============================================================
     private fun showDeleteConfirm(bill: BillListAdapter.BillItem) {
+        // 构建详细信息
+        val dateStr = DateUtil.dateIntToDisplay(bill.payDate)
+        val amountYuan = bill.amount / 100.0
+        val amountStr = String.format("%.2f", amountYuan)
+        val sign = if (bill.isIncome) "+" else "-"
+        val remark = bill.remark.ifEmpty { "无" }
+
+        val message = """
+        日期：$dateStr
+        分类：${bill.categoryName}
+        渠道：${bill.channelName}
+        金额：$sign¥$amountStr
+        备注：$remark
+        
+        确定要删除这笔账单吗？""".trimIndent()
+
         AlertDialog.Builder(requireContext())
-            .setTitle("删除确认")
-            .setMessage("确定要删除这笔账单吗？")
+            .setTitle("⚠️ 删除确认")
+            .setMessage(message)
             .setPositiveButton("删除") { _, _ ->
                 (parentFragment as? HomeFragment)?.deleteConsumeBill(bill.id)
             }
