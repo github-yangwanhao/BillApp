@@ -36,14 +36,59 @@
         android:layout_height="1dp"
         android:background="#E0E0E0" />
 
-    <!-- 菜单项：导出数据 -->
+    <!-- ========== 🔥 菜单项：文件导入（移到最上面） ========== -->
     <LinearLayout
+        android:id="@+id/btn_file_import"
         android:layout_width="match_parent"
         android:layout_height="52dp"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingStart="16dp"
-        android:paddingEnd="16dp">
+        android:paddingEnd="16dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?attr/selectableItemBackground">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@android:drawable/ic_menu_upload"
+            android:contentDescription="导入" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="16dp"
+            android:text="文件导入"
+            android:textSize="16sp" />
+
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:src="@android:drawable/ic_media_play"
+            android:contentDescription="箭头" />
+
+    </LinearLayout>
+
+    <!-- 分割线 -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#E0E0E0" />
+
+    <!-- 菜单项：导出数据 -->
+    <LinearLayout
+        android:id="@+id/btn_export_data"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?attr/selectableItemBackground">
 
         <ImageView
             android:layout_width="24dp"
@@ -75,12 +120,16 @@
 
     <!-- 菜单项：关于 -->
     <LinearLayout
+        android:id="@+id/btn_about"
         android:layout_width="match_parent"
         android:layout_height="52dp"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingStart="16dp"
-        android:paddingEnd="16dp">
+        android:paddingEnd="16dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?attr/selectableItemBackground">
 
         <ImageView
             android:layout_width="24dp"

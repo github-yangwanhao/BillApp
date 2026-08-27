@@ -71,4 +71,18 @@ class ConsumeBillRepository(
     suspend fun insertAll(bills: List<ConsumeBill>) {
         consumeBillDao.insertAll(bills)
     }
+
+    /**
+     * 按月份删除所有支出账单
+     */
+    suspend fun deleteByBillMonth(billMonth: Int) {
+        consumeBillDao.deleteByBillMonth(billMonth)
+    }
+
+    /**
+     * 按月份查询是否有支出账单
+     */
+    suspend fun existsByBillMonth(billMonth: Int): Boolean {
+        return consumeBillDao.countByBillMonth(billMonth) > 0
+    }
 }

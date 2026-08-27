@@ -1,65 +1,64 @@
 package cn.yangwanhao.billapp
 
 import android.os.Bundle
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.Fragment
-import cn.yangwanhao.billapp.base.BaseActivity
-import com.google.android.material.bottomnavigation.BottomNavigationView
-import cn.yangwanhao.billapp.ui.fragment.StatsFragment
-import cn.yangwanhao.billapp.ui.fragment.ProfileFragment
+import androidx.navigation.NavController
+import androidx.navigation.fragment.NavHostFragment
+import cn.yangwanhao.billapp.databinding.ActivityMainBinding
 import cn.yangwanhao.billapp.ui.home.HomeFragment
 
-class MainActivity : BaseActivity() {
+class MainActivity : AppCompatActivity() {
 
-    // 三个 Fragment 实例
-    private val homeFragment = HomeFragment()
-    private val statsFragment = StatsFragment()
-    private val profileFragment = ProfileFragment()
+    private lateinit var binding: ActivityMainBinding
+    private lateinit var navController: NavController
 
-    // 当前活跃的 Fragment
-    private var activeFragment: Fragment = homeFragment
+    // 持有 HomeFragment 引用，用于切换 ViewPager2
+    var homeFragment: HomeFragment? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_nav)
+        // 获取 NavController
+        val navHostFragment = supportFragmentManager
+            .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        navController = navHostFragment.navController
 
-        // 初始化：先添加三个 Fragment，只显示首页
-        supportFragmentManager.beginTransaction()
-            .add(R.id.fragment_container, profileFragment, "profile").hide(profileFragment)
-            .add(R.id.fragment_container, statsFragment, "stats").hide(statsFragment)
-            .add(R.id.fragment_container, homeFragment, "home")
-            .commit()
-
-        // 底部导航切换监听
-        bottomNav.setOnItemSelectedListener { item ->
-            when (item.itemId) {
+        // 🔥 底部导航栏点击事件：控制 ViewPager2 切换
+        binding.bottomNavView.setOnItemSelectedListener { menuItem ->
+            when (menuItem.itemId) {
                 R.id.nav_home -> {
-                    switchFragment(homeFragment)
+                    homeFragment?.setCurrentTab(0)
                     true
                 }
                 R.id.nav_stats -> {
-                    switchFragment(statsFragment)
+                    homeFragment?.setCurrentTab(1)
                     true
                 }
                 R.id.nav_profile -> {
-                    switchFragment(profileFragment)
+                    homeFragment?.setCurrentTab(2)
                     true
                 }
                 else -> false
             }
         }
+
+        // 监听目的地变化：进入导入页面时隐藏底部导航栏
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            when (destination.id) {
+                R.id.importMainFragment, R.id.importExpenseFragment -> {
+                    binding.bottomNavView.visibility = View.GONE
+                }
+                else -> {
+                    binding.bottomNavView.visibility = View.VISIBLE
+                }
+            }
+        }
     }
 
-    /** 切换 Fragment */
-    private fun switchFragment(target: Fragment) {
-        if (target != activeFragment) {
-            supportFragmentManager.beginTransaction()
-                .hide(activeFragment)
-                .show(target)
-                .commit()
-            activeFragment = target
-        }
+    override fun onSupportNavigateUp(): Boolean {
+        return navController.navigateUp() || super.onSupportNavigateUp()
     }
 }

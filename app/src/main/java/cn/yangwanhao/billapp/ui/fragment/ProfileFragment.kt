@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import cn.yangwanhao.billapp.R
 
 class ProfileFragment : Fragment() {
@@ -29,6 +30,13 @@ class ProfileFragment : Fragment() {
             tvVersion.text = "版本 ${packageInfo.versionName}"
         } catch (e: Exception) {
             tvVersion.text = "版本 1.0.0"
+        }
+
+        // 🔥 文件导入入口
+        val btnFileImport: View? = view.findViewById(R.id.btn_file_import)
+        btnFileImport?.setOnClickListener {
+            // 使用 Navigation 跳转到导入主页面
+            findNavController().navigate(R.id.importMainFragment)
         }
     }
 }

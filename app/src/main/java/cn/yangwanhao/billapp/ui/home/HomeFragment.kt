@@ -8,8 +8,11 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.viewpager2.widget.ViewPager2
+import cn.yangwanhao.billapp.MainActivity
 import cn.yangwanhao.billapp.databinding.FragmentHomeBinding
 import cn.yangwanhao.billapp.ui.add.AddExpenseDialogFragment
+import cn.yangwanhao.billapp.ui.fragment.ProfileFragment
+import cn.yangwanhao.billapp.ui.fragment.StatsFragment
 import com.google.android.material.tabs.TabLayoutMediator
 
 class HomeFragment : Fragment() {
@@ -30,36 +33,38 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // 1. 初始化 ViewPager2 和 TabLayout
-        val adapter = ViewPagerAdapter(this)
+        // 注册到 Activity
+        (activity as? MainActivity)?.homeFragment = this
+
+        // 🔥 ViewPager2 适配器：3 个页面（首页/统计/我的）
+        val adapter = HomeViewPagerAdapter(this)
         binding.viewPager.adapter = adapter
 
-        TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
-            tab.text = if (position == 0) "支出" else "收入"
-        }.attach()
-
-        // 🔥 监听 ViewPager2 页面切换，切换时刷新数据
-        binding.viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
-            override fun onPageSelected(position: Int) {
-                super.onPageSelected(position)
-                when (position) {
-                    0 -> {
-                        // 切换到支出 Tab → 刷新消费数据
-                        consumeViewModel.refresh()
-                    }
-                    1 -> {
-                        // 切换到收入 Tab → 刷新收入数据
-                        incomeViewModel.refresh()
-                    }
+        // 🔥 TabLayout 只用于支出/收入 Tab（如果只需两个 Tab，保留）
+        // 如果底部导航已经有三 Tab，这里可能不需要 TabLayout，或者只显示支出/收入
+        // 如果 TabLayout 不需要，可以隐藏
+        // 这里根据你的实际需求决定
+        if (binding.tabLayout != null) {
+            TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
+                tab.text = when (position) {
+                    0 -> "支出"
+                    1 -> "收入"
+                    else -> ""  // 统计和我的页面不显示 Tab
                 }
-            }
-        })
+            }.attach()
+            // 只在第 0、1 页显示 TabLayout，第 2 页隐藏
+            binding.viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+                override fun onPageSelected(position: Int) {
+                    binding.tabLayout.visibility = if (position <= 1) View.VISIBLE else View.GONE
+                }
+            })
+        }
 
-        // 2. 首次加载数据
+        // 加载数据（仅在首页时加载）
         consumeViewModel.loadFirstPage()
         incomeViewModel.loadFirstPage()
 
-        // 3. FAB 点击事件
+        // FAB 点击事件（仅在首页时显示）
         binding.fabAddBill.setOnClickListener {
             val dialog = AddExpenseDialogFragment()
             dialog.setOnSaveSuccessListener {
@@ -71,6 +76,14 @@ class HomeFragment : Fragment() {
             }
             dialog.show(childFragmentManager, "AddExpenseDialog")
         }
+
+        // 切换页面时控制 FAB 显隐
+        binding.viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                // 第 0 页（首页）显示 FAB，其他隐藏
+                binding.fabAddBill.visibility = if (position == 0) View.VISIBLE else View.GONE
+            }
+        })
     }
 
     // ============================================================
@@ -100,8 +113,17 @@ class HomeFragment : Fragment() {
         incomeViewModel.deleteBill(billId)
     }
 
+    /**
+     * 供 Activity 调用，切换 ViewPager2 的 Tab
+     */
+    fun setCurrentTab(position: Int) {
+        binding.viewPager.currentItem = position
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
+        // 取消注册
+        (activity as? MainActivity)?.homeFragment = null
         _binding = null
     }
 }

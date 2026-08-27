@@ -6,9 +6,11 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import cn.yangwanhao.billapp.dao.ConsumeBillDao
 import cn.yangwanhao.billapp.dao.DictDao
+import cn.yangwanhao.billapp.dao.ImportFileHisDao
 import cn.yangwanhao.billapp.dao.IncomeBillDao
 import cn.yangwanhao.billapp.entity.ConsumeBill
 import cn.yangwanhao.billapp.entity.Dict
+import cn.yangwanhao.billapp.entity.ImportFileHis
 import cn.yangwanhao.billapp.entity.IncomeBill
 
 @Database(
@@ -16,6 +18,7 @@ import cn.yangwanhao.billapp.entity.IncomeBill
         ConsumeBill::class,
         IncomeBill::class,
         Dict::class,
+        ImportFileHis::class,
     ],
     version = 1,
     exportSchema = false
@@ -25,6 +28,7 @@ abstract class BillDatabase : RoomDatabase() {
     abstract fun consumeBillDao(): ConsumeBillDao
     abstract fun incomeBillDao(): IncomeBillDao
     abstract fun dictDao(): DictDao
+    abstract fun importFileHisDao(): ImportFileHisDao
 
     companion object {
         @Volatile

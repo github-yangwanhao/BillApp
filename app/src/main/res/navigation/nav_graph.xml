@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/homeFragment">
+
+    <!-- 主页面（包含 ViewPager2，管理首页/统计/我的） -->
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="cn.yangwanhao.billapp.ui.home.HomeFragment"
+        android:label="首页"
+        tools:layout="@layout/fragment_home" />
+
+    <!-- 导入主页面（层级跳转） -->
+    <fragment
+        android:id="@+id/importMainFragment"
+        android:name="cn.yangwanhao.billapp.ui.imports.ImportMainFragment"
+        android:label="文件导入"
+        tools:layout="@layout/fragment_import_main" />
+
+    <!-- 支出导入页面 -->
+    <fragment
+        android:id="@+id/importExpenseFragment"
+        android:name="cn.yangwanhao.billapp.ui.imports.ImportExpenseFragment"
+        android:label="支出导入"
+        tools:layout="@layout/fragment_import_expense" />
+
+    <!-- Action：从“我的”到导入主页 -->
+    <action
+        android:id="@+id/action_home_to_importMain"
+        app:destination="@id/importMainFragment" />
+
+    <!-- Action：从导入主页到支出导入 -->
+    <action
+        android:id="@+id/action_importMain_to_importExpense"
+        app:destination="@id/importExpenseFragment" />
+
+</navigation>

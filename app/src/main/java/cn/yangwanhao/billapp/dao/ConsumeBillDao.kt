@@ -66,4 +66,11 @@ interface ConsumeBillDao {
      */
     @Query("SELECT COUNT(*) FROM consume_bill")
     suspend fun getTotalCount(): Int
+
+    @Query("DELETE FROM consume_bill WHERE BILL_MONTH = :billMonth")
+    suspend fun deleteByBillMonth(billMonth: Int)
+
+    @Query("SELECT COUNT(*) FROM consume_bill WHERE BILL_MONTH = :billMonth")
+    suspend fun countByBillMonth(billMonth: Int): Int
+
 }
