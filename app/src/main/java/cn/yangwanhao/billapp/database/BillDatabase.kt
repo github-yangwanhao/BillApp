@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
+import cn.yangwanhao.billapp.base.DateTimeConverter
 import cn.yangwanhao.billapp.dao.ConsumeBillDao
 import cn.yangwanhao.billapp.dao.DictDao
 import cn.yangwanhao.billapp.dao.ImportFileHisDao
@@ -23,6 +25,7 @@ import cn.yangwanhao.billapp.entity.IncomeBill
     version = 1,
     exportSchema = false
 )
+@TypeConverters(DateTimeConverter::class)
 abstract class BillDatabase : RoomDatabase() {
 
     abstract fun consumeBillDao(): ConsumeBillDao

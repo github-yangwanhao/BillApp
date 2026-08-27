@@ -3,11 +3,8 @@ package cn.yangwanhao.billapp.entity
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import androidx.room.TypeConverters
-import cn.yangwanhao.billapp.base.DateTimeConverter
 import java.util.Date
 
-@TypeConverters(DateTimeConverter::class)
 @Entity(tableName = "import_file_his")
 data class ImportFileHis(
 

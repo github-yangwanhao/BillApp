@@ -3,6 +3,7 @@ package cn.yangwanhao.billapp.entity
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import java.util.Date
 
 @Entity(tableName = "dict")
 data class Dict(
@@ -29,9 +30,9 @@ data class Dict(
 
     /** 创建时间 */
     @ColumnInfo(name = "CREATE_TIME")
-    val createTime: String? = null,
+    val createTime: Date,
 
     /** 更新时间 */
     @ColumnInfo(name = "UPDATE_TIME")
-    val updateTime: String? = null
+    val updateTime: Date
 )

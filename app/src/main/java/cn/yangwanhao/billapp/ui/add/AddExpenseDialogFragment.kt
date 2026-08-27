@@ -30,6 +30,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Date
 import java.util.Locale
 
 class AddExpenseDialogFragment : BottomSheetDialogFragment() {
@@ -375,7 +376,7 @@ class AddExpenseDialogFragment : BottomSheetDialogFragment() {
         val billMonth = payDate / 100
         val remark = binding.etRemark.text.toString().trim()
 
-        val currentTime = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Calendar.getInstance().time)
+        val currentTime = Date()
 
         val bill = ConsumeBill(
             amount = amountFen,
@@ -434,7 +435,7 @@ class AddExpenseDialogFragment : BottomSheetDialogFragment() {
         }
 
         val today = dateFormat.format(Calendar.getInstance().time).replace("-", "").toInt()
-        val currentTime = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Calendar.getInstance().time)
+        val currentTime = Date()
 
         // 构建账单列表
         val bills = result.bills.map { installment ->

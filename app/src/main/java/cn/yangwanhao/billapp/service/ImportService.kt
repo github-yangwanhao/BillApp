@@ -11,9 +11,7 @@ import cn.yangwanhao.billapp.repository.DictRepository
 import cn.yangwanhao.billapp.utils.ExcelParser
 import cn.yangwanhao.billapp.utils.FileUtils
 import java.io.File
-import java.text.SimpleDateFormat
 import java.util.Date
-import java.util.Locale
 
 /**
  * 导入结果
@@ -34,8 +32,6 @@ class ImportService(
     private val dictRepository: DictRepository,
     private val consumeBillRepository: ConsumeBillRepository
 ) {
-
-    private val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
 
     /**
      * 解析文件名，提取 billMonth
@@ -138,7 +134,7 @@ class ImportService(
                 continue
             }
 
-            val currentTime = dateFormat.format(Date())
+            val currentTime = Date()
 
             bills.add(
                 ConsumeBill(

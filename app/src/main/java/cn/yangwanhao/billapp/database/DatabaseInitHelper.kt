@@ -6,6 +6,7 @@ import cn.yangwanhao.billapp.common.Constant
 import cn.yangwanhao.billapp.entity.Dict
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.util.Date
 
 class DatabaseInitHelper(
     private val context: Context,
@@ -25,6 +26,7 @@ class DatabaseInitHelper(
 
         withContext(Dispatchers.IO) {
             val dictDao = db.dictDao()
+            val now = Date()
 
             // 1. 默认消费分类
             val consumeCategories = listOf("餐饮美食", "生活日用", "交通出行", "医疗保健", "服饰美容",
@@ -34,7 +36,9 @@ class DatabaseInitHelper(
                     dictKey = Constant.DICT_KEY_CONSUME_CATEGORY,
                     dictValue = value,
                     sort = index,
-                    status = Constant.STATUS_ENABLE
+                    status = Constant.STATUS_ENABLE,
+                    createTime = now,
+                    updateTime = now
                 )
             }
             dictDao.insertAll(consumeDicts)
@@ -46,7 +50,9 @@ class DatabaseInitHelper(
                     dictKey = Constant.DICT_KEY_INCOME_CATEGORY,
                     dictValue = value,
                     sort = index,
-                    status = Constant.STATUS_ENABLE
+                    status = Constant.STATUS_ENABLE,
+                    createTime = now,
+                    updateTime = now
                 )
             }
             dictDao.insertAll(incomeDicts)
@@ -58,20 +64,24 @@ class DatabaseInitHelper(
                     dictKey = Constant.DICT_KEY_PAY_CHANNEL,
                     dictValue = value,
                     sort = index,
-                    status = Constant.STATUS_ENABLE
+                    status = Constant.STATUS_ENABLE,
+                    createTime = now,
+                    updateTime = now
                 )
             }
             dictDao.insertAll(payChannelDicts)
 
             // 4. 默认消费备注
-            val consumeRemark = listOf("午饭", "晚饭", "地铁", "早饭", "叮咚买菜", "话费充值", "美团买药",
-                "美团买菜", "餐厅充值", "火车票", "鸡蛋")
+            val consumeRemark = listOf("午饭", "晚饭", "地铁", "早饭", "房租", "话费充值", "水费",
+                "电费", "餐厅充值", "火车票")
             val consumeRemarkDicts = consumeRemark.mapIndexed { index, value ->
                 Dict(
                     dictKey = Constant.DICT_KEY_CONSUME_REMARK,
                     dictValue = value,
                     sort = index,
-                    status = Constant.STATUS_ENABLE
+                    status = Constant.STATUS_ENABLE,
+                    createTime = now,
+                    updateTime = now
                 )
             }
             dictDao.insertAll(consumeRemarkDicts)
@@ -83,7 +93,9 @@ class DatabaseInitHelper(
                     dictKey = Constant.DICT_KEY_INCOME_REMARK,
                     dictValue = value,
                     sort = index,
-                    status = Constant.STATUS_ENABLE
+                    status = Constant.STATUS_ENABLE,
+                    createTime = now,
+                    updateTime = now
                 )
             }
             dictDao.insertAll(incomeRemarkDicts)
