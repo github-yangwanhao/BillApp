@@ -2,8 +2,8 @@ package cn.yangwanhao.billapp.ui.home
 
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
-import cn.yangwanhao.billapp.ui.fragment.ProfileFragment
-import cn.yangwanhao.billapp.ui.fragment.StatsFragment
+import cn.yangwanhao.billapp.ui.profile.ProfileFragment
+import cn.yangwanhao.billapp.ui.statistics.StatsFragment
 
 class HomeViewPagerAdapter(fragment: Fragment) : FragmentStateAdapter(fragment) {
 

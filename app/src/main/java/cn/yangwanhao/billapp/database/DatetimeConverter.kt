@@ -1,4 +1,4 @@
-package cn.yangwanhao.billapp.base
+package cn.yangwanhao.billapp.database
 
 import androidx.room.TypeConverter
 import java.util.Date

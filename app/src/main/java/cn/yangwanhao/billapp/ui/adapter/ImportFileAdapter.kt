@@ -1,13 +1,14 @@
 package cn.yangwanhao.billapp.ui.adapter
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import cn.yangwanhao.billapp.R
-import cn.yangwanhao.billapp.ui.imports.ImportFileItem   // 新增
-import cn.yangwanhao.billapp.ui.imports.ImportFileStatus // 新增
+import cn.yangwanhao.billapp.ui.profile.imports.ImportFileItem
+import cn.yangwanhao.billapp.ui.profile.imports.ImportFileStatus
 
 class ImportFileAdapter(
     private val onItemClick: (ImportFileItem) -> Unit
@@ -15,30 +16,12 @@ class ImportFileAdapter(
 
     private val items = mutableListOf<ImportFileItem>()
 
+    @SuppressLint("NotifyDataSetChanged")
     fun submitList(list: List<ImportFileItem>) {
         items.clear()
         items.addAll(list)
         notifyDataSetChanged()
     }
-
-    fun updateStatus(filePath: String, status: ImportFileStatus, recordCount: Int = 0, errorMessage: String? = null) {
-        val index = items.indexOfFirst { it.filePath == filePath }
-        if (index != -1) {
-            items[index] = items[index].copy(
-                status = status,
-                recordCount = recordCount,
-                errorMessage = errorMessage
-            )
-            notifyItemChanged(index)
-        }
-    }
-
-    fun clearAll() {
-        items.clear()
-        notifyDataSetChanged()
-    }
-
-    fun getItems(): List<ImportFileItem> = items
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context)
@@ -58,6 +41,7 @@ class ImportFileAdapter(
         private val tvFileInfo: TextView = itemView.findViewById(R.id.tvFileInfo)
         private val tvStatus: TextView = itemView.findViewById(R.id.tvStatus)
 
+        @SuppressLint("DefaultLocale")
         fun bind(item: ImportFileItem, onItemClick: (ImportFileItem) -> Unit) {
             tvFileName.text = item.fileName
 

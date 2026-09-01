@@ -1,6 +1,7 @@
 package cn.yangwanhao.billapp.utils
 
-import cn.yangwanhao.billapp.entity.InstallmentBill
+import android.annotation.SuppressLint
+import cn.yangwanhao.billapp.dto.InstallmentBillDto
 import java.util.Calendar
 
 object InstallmentCalculator {
@@ -26,7 +27,7 @@ object InstallmentCalculator {
         val baseAmount = totalAmount / count
         val remainder = totalAmount - (baseAmount * count)
 
-        val bills = mutableListOf<InstallmentBill>()
+        val bills = mutableListOf<InstallmentBillDto>()
 
         for (i in 0 until count) {
             // 最后一期：补上余数
@@ -46,7 +47,7 @@ object InstallmentCalculator {
             }
 
             bills.add(
-                InstallmentBill(
+                InstallmentBillDto(
                     installmentIndex = i + 1,
                     amount = amount,
                     billMonth = billMonth,
@@ -83,6 +84,7 @@ object InstallmentCalculator {
     /**
      * 将 yyyyMM 格式的月份显示为 "yyyy年MM月"
      */
+    @SuppressLint("DefaultLocale")
     fun formatMonth(monthInt: Int): String {
         val year = monthInt / 100
         val month = monthInt % 100
@@ -96,5 +98,5 @@ object InstallmentCalculator {
 data class InstallmentResult(
     val totalAmount: Int,
     val installmentCount: Int,
-    val bills: List<InstallmentBill>
+    val bills: List<InstallmentBillDto>
 )

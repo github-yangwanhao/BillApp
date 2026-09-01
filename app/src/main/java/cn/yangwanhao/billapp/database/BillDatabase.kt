@@ -5,7 +5,6 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import cn.yangwanhao.billapp.base.DateTimeConverter
 import cn.yangwanhao.billapp.dao.ConsumeBillDao
 import cn.yangwanhao.billapp.dao.DictDao
 import cn.yangwanhao.billapp.dao.ImportFileHisDao

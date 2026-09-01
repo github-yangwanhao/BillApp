@@ -1,9 +1,10 @@
-package cn.yangwanhao.billapp.ui.imports
+package cn.yangwanhao.billapp.ui.profile.imports
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import cn.yangwanhao.billapp.R
@@ -38,10 +39,10 @@ class ImportMainFragment : Fragment() {
 
         // 收入导入（暂未开放）
         binding.btnIncomeImport.setOnClickListener {
-            android.widget.Toast.makeText(
+            Toast.makeText(
                 requireContext(),
                 "收入导入功能即将开放，敬请期待",
-                android.widget.Toast.LENGTH_SHORT
+                Toast.LENGTH_SHORT
             ).show()
         }
     }

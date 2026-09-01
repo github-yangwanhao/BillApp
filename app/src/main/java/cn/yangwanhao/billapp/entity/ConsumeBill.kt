@@ -42,7 +42,7 @@ data class ConsumeBill(
 
     /** 导入文件ID，关联 import_file_his.ID */
     @ColumnInfo(name = "IMPORT_FILE_ID")
-    val importFileId: Int?,
+    val importFileId: Long?,
 
     /** 创建时间 */
     @ColumnInfo(name = "CREATE_TIME")

@@ -1,5 +1,6 @@
 package cn.yangwanhao.billapp.utils
 
+import android.annotation.SuppressLint
 import cn.yangwanhao.billapp.common.ImportConstants
 import org.apache.poi.hssf.usermodel.HSSFWorkbook
 import org.apache.poi.ss.usermodel.Cell
@@ -27,6 +28,7 @@ data class ExcelParseResult(
 
 object ExcelParser {
 
+    @SuppressLint("ConstantLocale")
     private val dateFormats = listOf(
         SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()),
         SimpleDateFormat("yyyy/MM/dd", Locale.getDefault()),

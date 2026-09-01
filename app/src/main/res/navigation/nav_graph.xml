@@ -15,14 +15,14 @@
     <!-- 导入主页面（层级跳转） -->
     <fragment
         android:id="@+id/importMainFragment"
-        android:name="cn.yangwanhao.billapp.ui.imports.ImportMainFragment"
+        android:name="cn.yangwanhao.billapp.ui.profile.imports.ImportMainFragment"
         android:label="文件导入"
         tools:layout="@layout/fragment_import_main" />
 
     <!-- 支出导入页面 -->
     <fragment
         android:id="@+id/importExpenseFragment"
-        android:name="cn.yangwanhao.billapp.ui.imports.ImportExpenseFragment"
+        android:name="cn.yangwanhao.billapp.ui.profile.imports.ImportExpenseFragment"
         android:label="支出导入"
         tools:layout="@layout/fragment_import_expense" />
 

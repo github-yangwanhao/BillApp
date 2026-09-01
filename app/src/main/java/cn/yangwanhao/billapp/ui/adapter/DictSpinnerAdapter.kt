@@ -17,16 +17,6 @@ class DictSpinnerAdapter(
         val name: String
     )
 
-    /** 设置数据并刷新 */
-    fun setData(newItems: List<DictItem>) {
-        items.clear()
-        items.addAll(newItems)
-        notifyDataSetChanged()
-    }
-
-    /** 根据位置获取字典项 */
-    fun getItemAt(position: Int): DictItem = items[position]
-
     override fun getCount(): Int = items.size
     override fun getItem(position: Int): DictItem = items[position]
     override fun getItemId(position: Int): Long = items[position].id

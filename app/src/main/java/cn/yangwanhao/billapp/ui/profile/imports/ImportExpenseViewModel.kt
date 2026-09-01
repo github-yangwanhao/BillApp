@@ -1,4 +1,4 @@
-package cn.yangwanhao.billapp.ui.imports
+package cn.yangwanhao.billapp.ui.profile.imports
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import cn.yangwanhao.billapp.database.BillDatabase
 import cn.yangwanhao.billapp.repository.ConsumeBillRepository
 import cn.yangwanhao.billapp.repository.DictRepository
+import cn.yangwanhao.billapp.repository.ImportFileHisRepository
 import cn.yangwanhao.billapp.service.ImportResult
 import cn.yangwanhao.billapp.service.ImportService
 import kotlinx.coroutines.launch
@@ -18,12 +19,13 @@ class ImportExpenseViewModel(application: Application) : AndroidViewModel(applic
     private val database = BillDatabase.getDatabase(application)
     private val consumeBillDao = database.consumeBillDao()
     private val importFileHisDao = database.importFileHisDao()
+    private val importFileHisRepository = ImportFileHisRepository(importFileHisDao)
     private val dictRepository = DictRepository(database.dictDao())
-    private val consumeBillRepository = ConsumeBillRepository(consumeBillDao, database.dictDao())
+    private val consumeBillRepository = ConsumeBillRepository(consumeBillDao)
 
     private val importService = ImportService(
-        consumeBillDao = consumeBillDao,
-        importFileHisDao = importFileHisDao,
+        database = database,
+        importFileHisRepository = importFileHisRepository,
         dictRepository = dictRepository,
         consumeBillRepository = consumeBillRepository
     )
@@ -91,7 +93,7 @@ class ImportExpenseViewModel(application: Application) : AndroidViewModel(applic
     /**
      * 开始导入
      */
-    fun startImport(onConflict: (Int, Int) -> Boolean) {
+    fun startImport(onConflict: suspend(Int, Int) -> Boolean) {
         val fileList = _files.value ?: emptyList()
         if (fileList.isEmpty()) {
             _toastMessage.value = "请先选择文件"

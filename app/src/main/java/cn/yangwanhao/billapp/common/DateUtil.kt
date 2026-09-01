@@ -1,27 +1,9 @@
 package cn.yangwanhao.billapp.common
 
 import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Date
 import java.util.Locale
 
 object DateUtil {
-
-    /**
-     * 获取当前日期的 yyyyMMdd 格式整数（如 20260822）
-     */
-    fun getCurrentDateInt(): Int {
-        val sdf = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
-        return sdf.format(Date()).toInt()
-    }
-
-    /**
-     * 获取当前月份的 yyyyMM 格式整数（如 202608）
-     */
-    fun getCurrentMonthInt(): Int {
-        val sdf = SimpleDateFormat("yyyyMM", Locale.getDefault())
-        return sdf.format(Date()).toInt()
-    }
 
     /**
      * 将 yyyyMMdd 格式的整数转为 yyyy年MM月dd日 格式的字符串
@@ -51,18 +33,4 @@ object DateUtil {
         }
     }
 
-    /**
-     * 获取指定月份的上个月（如 202608 -> 202607）
-     */
-    fun getPreviousMonth(monthInt: Int): Int {
-        val sdf = SimpleDateFormat("yyyyMM", Locale.getDefault())
-        val calendar = Calendar.getInstance()
-        try {
-            calendar.time = sdf.parse(monthInt.toString())!!
-            calendar.add(Calendar.MONTH, -1)
-            return sdf.format(calendar.time).toInt()
-        } catch (e: Exception) {
-            return monthInt
-        }
-    }
 }

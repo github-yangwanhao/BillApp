@@ -12,11 +12,6 @@ class DictRepository(
         return dictDao.getByKey(dictKey)
     }
 
-    /** 根据ID获取字典项 */
-    suspend fun getById(id: Long): Dict? {
-        return dictDao.getById(id)
-    }
-
     /**
      * 根据字典值查询字典条目
      * @param dictKey 字典类型
@@ -25,5 +20,15 @@ class DictRepository(
      */
     suspend fun getByValue(dictKey: String, dictValue: String): Dict? {
         return dictDao.getByValue(dictKey, dictValue)
+    }
+
+    /** 根据分类ID获取分类名称 */
+    suspend fun getCategoryName(categoryId: Int): String {
+        return dictDao.getById(categoryId.toLong())?.dictValue ?: "未知分类"
+    }
+
+    /** 根据支付渠道ID获取渠道名称 */
+    suspend fun getChannelName(channelId: Int): String {
+        return dictDao.getById(channelId.toLong())?.dictValue ?: "未知渠道"
     }
 }

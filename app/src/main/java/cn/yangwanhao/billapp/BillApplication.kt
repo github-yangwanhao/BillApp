@@ -7,7 +7,6 @@ import cn.yangwanhao.billapp.database.BillDatabase
 import cn.yangwanhao.billapp.database.DatabaseInitHelper
 import cn.yangwanhao.billapp.repository.ConsumeBillRepository
 import cn.yangwanhao.billapp.repository.DictRepository
-import cn.yangwanhao.billapp.repository.IncomeBillRepository
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import java.util.Locale
@@ -22,10 +21,7 @@ class BillApplication : Application() {
         DictRepository(database.dictDao())
     }
     val consumeBillRepository: ConsumeBillRepository by lazy {
-        ConsumeBillRepository(database.consumeBillDao(), database.dictDao())
-    }
-    val incomeBillRepository: IncomeBillRepository by lazy {
-        IncomeBillRepository(database.incomeBillDao(), database.dictDao())
+        ConsumeBillRepository(database.consumeBillDao())
     }
 
     override fun onCreate() {

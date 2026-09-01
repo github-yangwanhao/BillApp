@@ -16,7 +16,4 @@ interface ImportFileHisDao {
     @Query("SELECT * FROM import_file_his WHERE FILE_MD5 = :md5 LIMIT 1")
     suspend fun getByMd5(md5: String): ImportFileHis?
 
-    /** 查询所有导入记录，按创建时间降序 */
-    @Query("SELECT * FROM import_file_his ORDER BY CREATE_TIME DESC")
-    suspend fun getAll(): List<ImportFileHis>
 }

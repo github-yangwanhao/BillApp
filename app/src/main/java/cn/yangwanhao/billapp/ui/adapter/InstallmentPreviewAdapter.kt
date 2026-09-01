@@ -1,22 +1,23 @@
 package cn.yangwanhao.billapp.ui.adapter
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import cn.yangwanhao.billapp.R
-import cn.yangwanhao.billapp.entity.InstallmentBill
+import cn.yangwanhao.billapp.dto.InstallmentBillDto
 import cn.yangwanhao.billapp.utils.InstallmentCalculator
 
 class InstallmentPreviewAdapter(
-    private val onRemarkClick: (InstallmentBill, Int) -> Unit
+    private val onRemarkClick: (InstallmentBillDto, Int) -> Unit
 ) : RecyclerView.Adapter<InstallmentPreviewAdapter.ViewHolder>() {
 
-    private var bills: List<InstallmentBill> = emptyList()
+    private var bills: List<InstallmentBillDto> = emptyList()
 
-    fun submitList(newBills: List<InstallmentBill>) {
+    @SuppressLint("NotifyDataSetChanged")
+    fun submitList(newBills: List<InstallmentBillDto>) {
         bills = newBills
         notifyDataSetChanged()
     }
@@ -39,10 +40,11 @@ class InstallmentPreviewAdapter(
         private val tvAmount: TextView = itemView.findViewById(R.id.tv_installment_amount)
         private val tvRemark: TextView = itemView.findViewById(R.id.tv_installment_remark)
 
+        @SuppressLint("SetTextI18n", "DefaultLocale")
         fun bind(
-            bill: InstallmentBill,
+            bill: InstallmentBillDto,
             position: Int,
-            onRemarkClick: (InstallmentBill, Int) -> Unit
+            onRemarkClick: (InstallmentBillDto, Int) -> Unit
         ) {
             tvIndex.text = "第${bill.installmentIndex}期"
             tvMonth.text = InstallmentCalculator.formatMonth(bill.billMonth)

@@ -10,9 +10,7 @@ import androidx.fragment.app.viewModels
 import androidx.viewpager2.widget.ViewPager2
 import cn.yangwanhao.billapp.MainActivity
 import cn.yangwanhao.billapp.databinding.FragmentHomeBinding
-import cn.yangwanhao.billapp.ui.add.AddExpenseDialogFragment
-import cn.yangwanhao.billapp.ui.fragment.ProfileFragment
-import cn.yangwanhao.billapp.ui.fragment.StatsFragment
+import cn.yangwanhao.billapp.ui.home.add.AddExpenseDialogFragment
 import com.google.android.material.tabs.TabLayoutMediator
 
 class HomeFragment : Fragment() {
@@ -44,21 +42,19 @@ class HomeFragment : Fragment() {
         // 如果底部导航已经有三 Tab，这里可能不需要 TabLayout，或者只显示支出/收入
         // 如果 TabLayout 不需要，可以隐藏
         // 这里根据你的实际需求决定
-        if (binding.tabLayout != null) {
-            TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
-                tab.text = when (position) {
-                    0 -> "支出"
-                    1 -> "收入"
-                    else -> ""  // 统计和我的页面不显示 Tab
-                }
-            }.attach()
-            // 只在第 0、1 页显示 TabLayout，第 2 页隐藏
-            binding.viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
-                override fun onPageSelected(position: Int) {
-                    binding.tabLayout.visibility = if (position <= 1) View.VISIBLE else View.GONE
-                }
-            })
-        }
+        TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
+            tab.text = when (position) {
+                0 -> "支出"
+                1 -> "收入"
+                else -> ""  // 统计和我的页面不显示 Tab
+            }
+        }.attach()
+        // 只在第 0、1 页显示 TabLayout，第 2 页隐藏
+        binding.viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                binding.tabLayout.visibility = if (position <= 1) View.VISIBLE else View.GONE
+            }
+        })
 
         // 加载数据（仅在首页时加载）
         consumeViewModel.loadFirstPage()

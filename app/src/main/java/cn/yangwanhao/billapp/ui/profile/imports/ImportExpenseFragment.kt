@@ -1,5 +1,6 @@
-package cn.yangwanhao.billapp.ui.imports
+package cn.yangwanhao.billapp.ui.profile.imports
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
@@ -10,12 +11,17 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
+import androidx.documentfile.provider.DocumentFile
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import cn.yangwanhao.billapp.databinding.FragmentImportExpenseBinding
 import cn.yangwanhao.billapp.ui.adapter.ImportFileAdapter
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import java.io.File
+import kotlin.coroutines.resume
 
 class ImportExpenseFragment : Fragment() {
 
@@ -23,7 +29,7 @@ class ImportExpenseFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val viewModel: ImportExpenseViewModel by viewModels()
-    private val adapter = ImportFileAdapter { item ->
+    private val adapter = ImportFileAdapter { _ ->
         // 点击文件可查看详情（可选）
     }
 
@@ -71,6 +77,7 @@ class ImportExpenseFragment : Fragment() {
         binding.rvImportFiles.adapter = adapter
     }
 
+    @SuppressLint("SetTextI18n")
     private fun setupObservers() {
         viewModel.files.observe(viewLifecycleOwner) { items ->
             adapter.submitList(items)
@@ -234,38 +241,11 @@ class ImportExpenseFragment : Fragment() {
     }
 
     /**
-     * 从 Uri 获取文件路径（简化版，适用于外部存储）
-     */
-    private fun getFilePathFromUri(uri: Uri): String? {
-        // 对于 ACTION_OPEN_DOCUMENT，可以通过 ContentResolver 获取文件路径
-        // 这里简化处理，直接使用 uri.path
-        return uri.path?.let { path ->
-            // 尝试从路径中提取真实路径
-            val cursor = requireContext().contentResolver.query(uri, null, null, null, null)
-            cursor?.use {
-                val nameIndex = it.getColumnIndex("_display_name")
-                if (nameIndex != -1 && it.moveToFirst()) {
-                    val fileName = it.getString(nameIndex)
-                    // 尝试构建文件路径（对于外部存储）
-                    val externalFiles = requireContext().getExternalFilesDir(null)
-                    if (externalFiles != null) {
-                        // 搜索文件
-                        val found = externalFiles.walk().find { file -> file.name == fileName }
-                        return found?.absolutePath
-                    }
-                }
-            }
-            // 兜底：返回 uri 的路径
-            uri.path
-        }
-    }
-
-    /**
      * 扫描文件夹中的 Excel 文件
      */
     private fun scanFolderForExcelFiles(uri: Uri): List<File> {
         val result = mutableListOf<File>()
-        val documentFile = androidx.documentfile.provider.DocumentFile.fromTreeUri(requireContext(), uri)
+        val documentFile = DocumentFile.fromTreeUri(requireContext(), uri)
         documentFile?.listFiles()?.forEach { doc ->
             if (doc.isFile) {
                 val fileName = doc.name ?: return@forEach
@@ -326,7 +306,6 @@ class ImportExpenseFragment : Fragment() {
      * 开始导入，处理月份冲突
      */
     private fun startImport() {
-        // 检查是否有文件
         val fileList = viewModel.files.value ?: emptyList()
         if (fileList.isEmpty()) {
             Toast.makeText(requireContext(), "请先选择文件", Toast.LENGTH_SHORT).show()
@@ -339,32 +318,26 @@ class ImportExpenseFragment : Fragment() {
             return
         }
 
-        // 检查是否有月份冲突（需要先查询数据库）
-        // 由于需要异步查询，我们通过 ViewModel 的 startImport 方法传入回调
-        viewModel.startImport { billMonth, existingCount ->
-            // 弹窗询问是否覆盖
-            var shouldOverwrite = false
-            val dialog = AlertDialog.Builder(requireContext())
-                .setTitle("月份冲突")
-                .setMessage("${billMonth / 100}年${billMonth % 100}月已有 $existingCount 条账单记录，是否覆盖？")
-                .setPositiveButton("覆盖") { _, _ ->
-                    shouldOverwrite = true
+        // 🔥 在协程中调用 ViewModel 的挂起方法
+        lifecycleScope.launch {
+            viewModel.startImport { billMonth, existingCount ->
+                // 将异步弹窗转为同步等待
+                suspendCancellableCoroutine { continuation ->
+                    AlertDialog.Builder(requireContext())
+                        .setTitle("月份冲突")
+                        .setMessage("${billMonth / 100}年${billMonth % 100}月已有 $existingCount 条账单记录，是否覆盖？")
+                        .setPositiveButton("覆盖") { _, _ ->
+                            continuation.resume(true)
+                        }
+                        .setNegativeButton("跳过") { _, _ ->
+                            continuation.resume(false)
+                        }
+                        .setOnCancelListener {
+                            continuation.resume(false)
+                        }
+                        .show()
                 }
-                .setNegativeButton("跳过") { _, _ ->
-                    shouldOverwrite = false
-                }
-                .create()
-
-            // 注意：这里需要在主线程同步等待用户选择，但由于是协程调用，我们使用 suspendCoroutine
-            // 简化处理：在回调中弹窗，但需要阻塞等待
-            // 由于 AlertDialog 是异步的，这里需要特殊处理
-            // 实际实现中，可以使用 LiveData 或回调方式
-            // 目前简化：默认返回 false（跳过）
-            // TODO: 完善为真正的同步等待
-            // 临时方案：使用一个阻塞式弹窗
-            // 由于 Kotlin 协程与 AlertDialog 的配合较复杂，这里简化处理
-            // 先返回 false，让用户通过重新导入来处理
-            false
+            }
         }
     }
 

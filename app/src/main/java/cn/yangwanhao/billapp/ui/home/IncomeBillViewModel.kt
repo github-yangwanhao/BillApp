@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import cn.yangwanhao.billapp.database.BillDatabase
 import cn.yangwanhao.billapp.entity.IncomeBill
+import cn.yangwanhao.billapp.repository.DictRepository
 import cn.yangwanhao.billapp.repository.IncomeBillRepository
 import cn.yangwanhao.billapp.ui.adapter.BillListAdapter
 import kotlinx.coroutines.Dispatchers
@@ -18,13 +19,12 @@ class IncomeBillViewModel(application: Application) : AndroidViewModel(applicati
     private val database = BillDatabase.getDatabase(application)
     private val incomeBillDao = database.incomeBillDao()
     private val dictDao = database.dictDao()
-    private val repository = IncomeBillRepository(incomeBillDao, dictDao)
+    private val incomeBillRepository = IncomeBillRepository(incomeBillDao)
+    private val dictRepository = DictRepository(dictDao)
     private val _isLoadingMore = MutableLiveData(false)
-    val isLoadingMore: LiveData<Boolean> = _isLoadingMore
 
     private val pageSize = 20
     private var currentPage = 0
-    private var isLoading = false
     private var isAllLoaded = false
 
     private val _rawBills = mutableListOf<IncomeBill>()
@@ -44,14 +44,13 @@ class IncomeBillViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     fun loadNextPage() {
-        if (isLoading || isAllLoaded) return
+        if (isAllLoaded) return
 
-        isLoading = true
         _isLoadingMore.value = true
         viewModelScope.launch {
             try {
                 val offset = currentPage * pageSize
-                val newBills = repository.getBillsPaged(pageSize, offset)
+                val newBills = incomeBillRepository.getBillsPaged(pageSize, offset)
 
                 _rawBills.addAll(newBills)
 
@@ -63,7 +62,7 @@ class IncomeBillViewModel(application: Application) : AndroidViewModel(applicati
                 }
 
                 val items = withContext(Dispatchers.IO) {
-                    convertToAdapterItems(_rawBills, isLoading)
+                    convertToAdapterItems(_rawBills)
                 }
                 _adapterItems.postValue(items)
 
@@ -72,7 +71,6 @@ class IncomeBillViewModel(application: Application) : AndroidViewModel(applicati
                 e.printStackTrace()
                 _adapterItems.postValue(emptyList())
             } finally {
-                isLoading = false
                 _isLoadingMore.value = false
             }
         }
@@ -82,8 +80,7 @@ class IncomeBillViewModel(application: Application) : AndroidViewModel(applicati
      * 收入账单同样按 billMonth 分组
      */
     private suspend fun convertToAdapterItems(
-        bills: List<IncomeBill>,
-        isLoading: Boolean
+        bills: List<IncomeBill>
     ): List<Any> {
         if (bills.isEmpty()) return emptyList()
 
@@ -100,7 +97,7 @@ class IncomeBillViewModel(application: Application) : AndroidViewModel(applicati
         var monthBills = mutableListOf<BillListAdapter.BillItem>()
 
         for (bill in sortedBills) {
-            val categoryName = repository.getCategoryName(bill.categoryId)
+            val categoryName = dictRepository.getCategoryName(bill.categoryId)
 
             val billItem = BillListAdapter.BillItem(
                 id = bill.id,
@@ -110,7 +107,7 @@ class IncomeBillViewModel(application: Application) : AndroidViewModel(applicati
                 isIncome = true,
                 remark = "",
                 payDate = bill.postDate,
-                billMonth = bill.billMonth ?: 0
+                billMonth = bill.billMonth
             )
 
             if (bill.billMonth != lastMonth && lastMonth != 0) {
@@ -128,14 +125,6 @@ class IncomeBillViewModel(application: Application) : AndroidViewModel(applicati
             monthBills.add(billItem)
         }
 
-        if (lastMonth != 0) {
-            items.add(BillListAdapter.MonthHeader(
-                monthInt = lastMonth,
-                monthTotal = monthTotal
-            ))
-            items.addAll(monthBills)
-        }
-
         if (_hasMore.value == true) {
             items.add(BillListAdapter.LoadingPlaceholder(isLoading = true))
         } else if (bills.isNotEmpty()) {
@@ -151,7 +140,7 @@ class IncomeBillViewModel(application: Application) : AndroidViewModel(applicati
 
     fun deleteBill(billId: Long) {
         viewModelScope.launch {
-            repository.deleteBillById(billId)
+            incomeBillRepository.deleteBillById(billId)
             refresh()
         }
     }

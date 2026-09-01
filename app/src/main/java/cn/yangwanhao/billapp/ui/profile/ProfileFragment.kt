@@ -1,5 +1,6 @@
-package cn.yangwanhao.billapp.ui.fragment
+package cn.yangwanhao.billapp.ui.profile
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -19,6 +20,7 @@ class ProfileFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_profile, container, false)
     }
 
+    @SuppressLint("SetTextI18n")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -28,7 +30,7 @@ class ProfileFragment : Fragment() {
             val packageInfo = requireContext().packageManager
                 .getPackageInfo(requireContext().packageName, 0)
             tvVersion.text = "版本 ${packageInfo.versionName}"
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             tvVersion.text = "版本 1.0.0"
         }
 

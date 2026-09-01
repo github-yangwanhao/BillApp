@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- 选中状态：灰色/黑色 -->
-    <item android:color="#333333" android:state_checked="true" />
-    <!-- 未选中状态：浅灰色 -->
-    <item android:color="#999999" android:state_checked="false" />
-</selector>

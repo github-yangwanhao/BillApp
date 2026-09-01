@@ -1,5 +1,6 @@
 package cn.yangwanhao.billapp.ui.home
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -61,10 +62,6 @@ class IncomeListFragment : Fragment() {
                 // 🔥 控制空状态显示
                 showEmptyState(safeItems.isEmpty())
             }
-
-            homeFragment.incomeViewModel.hasMore.observe(viewLifecycleOwner) { hasMore ->
-                // 可选
-            }
         }
 
         binding.swipeRefreshLayout.setOnRefreshListener {
@@ -101,6 +98,7 @@ class IncomeListFragment : Fragment() {
     // ============================================================
     //  点击查看详情
     // ============================================================
+    @SuppressLint("DefaultLocale")
     private fun showBillDetail(bill: BillListAdapter.BillItem) {
         val dateStr = DateUtil.dateIntToDisplay(bill.payDate)
         val amountYuan = bill.amount / 100.0
@@ -127,6 +125,7 @@ class IncomeListFragment : Fragment() {
     // ============================================================
     //  长按删除
     // ============================================================
+    @SuppressLint("DefaultLocale")
     private fun showDeleteConfirm(bill: BillListAdapter.BillItem) {
         val dateStr = DateUtil.dateIntToDisplay(bill.payDate)
         val amountYuan = bill.amount / 100.0

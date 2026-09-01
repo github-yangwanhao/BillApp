@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import cn.yangwanhao.billapp.database.BillDatabase
 import cn.yangwanhao.billapp.entity.ConsumeBill
 import cn.yangwanhao.billapp.repository.ConsumeBillRepository
+import cn.yangwanhao.billapp.repository.DictRepository
 import cn.yangwanhao.billapp.ui.adapter.BillListAdapter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -18,14 +19,13 @@ class ConsumeBillViewModel(application: Application) : AndroidViewModel(applicat
     private val database = BillDatabase.getDatabase(application)
     private val consumeBillDao = database.consumeBillDao()
     private val dictDao = database.dictDao()
-    private val repository = ConsumeBillRepository(consumeBillDao, dictDao)
+    private val consumeBillRepository = ConsumeBillRepository(consumeBillDao)
+    private val dictRepository = DictRepository(dictDao)
     private val _isLoadingMore = MutableLiveData(false)
-    val isLoadingMore: LiveData<Boolean> = _isLoadingMore
 
     // ========== 分页相关 ==========
     private val pageSize = 20
     private var currentPage = 0
-    private var isLoading = false
     private var isAllLoaded = false
 
     // ========== 原始数据 ==========
@@ -47,14 +47,13 @@ class ConsumeBillViewModel(application: Application) : AndroidViewModel(applicat
     }
 
     fun loadNextPage() {
-        if (isLoading || isAllLoaded) return
+        if (isAllLoaded) return
 
-        isLoading = true
         _isLoadingMore.value = true
         viewModelScope.launch {
             try {
                 val offset = currentPage * pageSize
-                val newBills = repository.getBillsPaged(pageSize, offset)
+                val newBills = consumeBillRepository.getBillsPaged(pageSize, offset)
 
                 _rawBills.addAll(newBills)
 
@@ -66,7 +65,7 @@ class ConsumeBillViewModel(application: Application) : AndroidViewModel(applicat
                 }
 
                 val items = withContext(Dispatchers.IO) {
-                    convertToAdapterItems(_rawBills, isLoading)
+                    convertToAdapterItems(_rawBills)
                 }
                 _adapterItems.postValue(items)
 
@@ -75,7 +74,6 @@ class ConsumeBillViewModel(application: Application) : AndroidViewModel(applicat
                 e.printStackTrace()
                 _adapterItems.postValue(emptyList())
             } finally {
-                isLoading = false
                 _isLoadingMore.value = false
             }
         }
@@ -86,8 +84,7 @@ class ConsumeBillViewModel(application: Application) : AndroidViewModel(applicat
      * 🔥 核心改动：按 billMonth 分组（权责发生制）
      */
     private suspend fun convertToAdapterItems(
-        bills: List<ConsumeBill>,
-        isLoading: Boolean
+        bills: List<ConsumeBill>
     ): List<Any> {
         if (bills.isEmpty()) return emptyList()
 
@@ -103,8 +100,8 @@ class ConsumeBillViewModel(application: Application) : AndroidViewModel(applicat
         var monthBills = mutableListOf<BillListAdapter.BillItem>()
 
         for (bill in sortedBills) {
-            val categoryName = repository.getCategoryName(bill.categoryId)
-            val channelName = repository.getChannelName(bill.payChannelId)
+            val categoryName = dictRepository.getCategoryName(bill.categoryId)
+            val channelName = dictRepository.getChannelName(bill.payChannelId)
 
             val billItem = BillListAdapter.BillItem(
                 id = bill.id,
@@ -168,7 +165,7 @@ class ConsumeBillViewModel(application: Application) : AndroidViewModel(applicat
 
     fun deleteBill(billId: Long) {
         viewModelScope.launch {
-            repository.deleteBillById(billId)
+            consumeBillRepository.deleteBillById(billId)
             refresh()
         }
     }

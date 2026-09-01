@@ -1,11 +1,16 @@
-package cn.yangwanhao.billapp.ui.add
+package cn.yangwanhao.billapp.ui.home.add
 
+import android.annotation.SuppressLint
+import android.app.AlertDialog
 import android.app.DatePickerDialog
 import android.app.Dialog
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
@@ -16,7 +21,7 @@ import cn.yangwanhao.billapp.common.Constant
 import cn.yangwanhao.billapp.databinding.FragmentAddExpenseBinding
 import cn.yangwanhao.billapp.entity.ConsumeBill
 import cn.yangwanhao.billapp.entity.Dict
-import cn.yangwanhao.billapp.entity.InstallmentBill
+import cn.yangwanhao.billapp.dto.InstallmentBillDto
 import cn.yangwanhao.billapp.repository.ConsumeBillRepository
 import cn.yangwanhao.billapp.repository.DictRepository
 import cn.yangwanhao.billapp.ui.adapter.InstallmentPreviewAdapter
@@ -32,6 +37,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import androidx.core.graphics.toColorInt
 
 class AddExpenseDialogFragment : BottomSheetDialogFragment() {
 
@@ -206,7 +212,7 @@ class AddExpenseDialogFragment : BottomSheetDialogFragment() {
             } else {
                 val text = binding.etInstallmentCount.text.toString()
                 when {
-                    text.isNullOrEmpty() -> {
+                    text.isEmpty() -> {
                         // 失焦且为空 → 恢复 "0"
                         binding.etInstallmentCount.setText("0")
                     }
@@ -282,11 +288,11 @@ class AddExpenseDialogFragment : BottomSheetDialogFragment() {
         }
     }
 
-    private fun showEditRemarkDialog(bill: InstallmentBill, position: Int) {
-        val editText = android.widget.EditText(requireContext())
+    private fun showEditRemarkDialog(bill: InstallmentBillDto, position: Int) {
+        val editText = EditText(requireContext())
         editText.setText(bill.remark)
         editText.hint = "输入备注"
-        android.app.AlertDialog.Builder(requireContext())
+        AlertDialog.Builder(requireContext())
             .setTitle("编辑备注（第${bill.installmentIndex}期）")
             .setView(editText)
             .setPositiveButton("确定") { _, _ ->
@@ -477,7 +483,7 @@ class AddExpenseDialogFragment : BottomSheetDialogFragment() {
             return
         }
         val names = categoryList.map { it.dictValue }.toTypedArray()
-        android.app.AlertDialog.Builder(requireContext())
+        AlertDialog.Builder(requireContext())
             .setTitle("选择分类")
             .setItems(names) { _, which ->
                 selectedCategory = categoryList[which]
@@ -492,7 +498,7 @@ class AddExpenseDialogFragment : BottomSheetDialogFragment() {
             return
         }
         val names = channelList.map { it.dictValue }.toTypedArray()
-        android.app.AlertDialog.Builder(requireContext())
+        AlertDialog.Builder(requireContext())
             .setTitle("选择支付方式")
             .setItems(names) { _, which ->
                 selectedChannel = channelList[which]
@@ -514,6 +520,7 @@ class AddExpenseDialogFragment : BottomSheetDialogFragment() {
         ).show()
     }
 
+    @SuppressLint("DiscouragedApi")
     private fun showMonthPicker() {
         // 从当前开始月份解析年月
         val currentStr = binding.etStartMonth.text.toString()
@@ -532,7 +539,7 @@ class AddExpenseDialogFragment : BottomSheetDialogFragment() {
             1
         ).apply {
             // 只显示年月选择
-            datePicker?.findViewById<View>(resources.getIdentifier("day", "id", "android"))?.visibility = View.GONE
+            datePicker.findViewById<View>(resources.getIdentifier("day", "id", "android"))?.visibility = View.GONE
         }.show()
     }
 
@@ -574,15 +581,15 @@ class AddExpenseDialogFragment : BottomSheetDialogFragment() {
         binding.btnNormalMode.isSelected = true
         binding.btnInstallmentMode.isSelected = false
         // 更新按钮样式
-        binding.btnNormalMode.backgroundTintList = android.content.res.ColorStateList.valueOf(
-            android.graphics.Color.parseColor("#E8E8E8")
+        binding.btnNormalMode.backgroundTintList = ColorStateList.valueOf(
+            "#E8E8E8".toColorInt()
         )
-        binding.btnNormalMode.setTextColor(android.graphics.Color.parseColor("#333333"))
+        binding.btnNormalMode.setTextColor("#333333".toColorInt())
 
-        binding.btnInstallmentMode.backgroundTintList = android.content.res.ColorStateList.valueOf(
-            android.graphics.Color.WHITE
+        binding.btnInstallmentMode.backgroundTintList = ColorStateList.valueOf(
+            Color.WHITE
         )
-        binding.btnInstallmentMode.setTextColor(android.graphics.Color.parseColor("#999999"))
+        binding.btnInstallmentMode.setTextColor("#999999".toColorInt())
 
         // 切换内容
         switchToNormalMode()
@@ -596,15 +603,15 @@ class AddExpenseDialogFragment : BottomSheetDialogFragment() {
         binding.btnInstallmentMode.isSelected = true
         binding.btnNormalMode.isSelected = false
         // 更新按钮样式
-        binding.btnInstallmentMode.backgroundTintList = android.content.res.ColorStateList.valueOf(
-            android.graphics.Color.parseColor("#E8E8E8")
+        binding.btnInstallmentMode.backgroundTintList = ColorStateList.valueOf(
+            "#E8E8E8".toColorInt()
         )
-        binding.btnInstallmentMode.setTextColor(android.graphics.Color.parseColor("#333333"))
+        binding.btnInstallmentMode.setTextColor("#333333".toColorInt())
 
-        binding.btnNormalMode.backgroundTintList = android.content.res.ColorStateList.valueOf(
-            android.graphics.Color.WHITE
+        binding.btnNormalMode.backgroundTintList = ColorStateList.valueOf(
+            Color.WHITE
         )
-        binding.btnNormalMode.setTextColor(android.graphics.Color.parseColor("#999999"))
+        binding.btnNormalMode.setTextColor("#999999".toColorInt())
 
         // 切换内容
         switchToInstallmentMode()

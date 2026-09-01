@@ -1,5 +1,6 @@
 package cn.yangwanhao.billapp.ui.adapter
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,6 +22,7 @@ class BillListAdapter(
 
     private val items = mutableListOf<Any>()
 
+    @SuppressLint("NotifyDataSetChanged")
     fun submitList(newItems: List<Any>) {
         items.clear()
         items.addAll(newItems)
@@ -33,7 +35,7 @@ class BillListAdapter(
             is BillItem -> TYPE_BILL_ITEM
             is LoadingPlaceholder -> TYPE_LOADING
             else -> {
-                android.util.Log.e("BillListAdapter", "未知类型: ${item?.javaClass?.simpleName}")
+                android.util.Log.e("BillListAdapter", "未知类型: ${item.javaClass.simpleName}")
                 TYPE_MONTH_HEADER
             }
         }
@@ -101,6 +103,7 @@ class BillListAdapter(
         private val tvDate: TextView = itemView.findViewById(R.id.tv_date)
         private val tvTotal: TextView = itemView.findViewById(R.id.tv_total)
 
+        @SuppressLint("DefaultLocale", "SetTextI18n")
         fun bind(header: MonthHeader) {
             val year = header.monthInt / 100
             val month = header.monthInt % 100
@@ -119,6 +122,7 @@ class BillListAdapter(
         private val tvAmount: TextView = itemView.findViewById(R.id.tv_amount)
         private val tvRemark: TextView = itemView.findViewById(R.id.tv_remark)
 
+        @SuppressLint("DefaultLocale", "SetTextI18n")
         fun bind(
             bill: BillItem,
             onItemClick: (BillItem) -> Unit,
@@ -144,9 +148,6 @@ class BillListAdapter(
 
             // 支付渠道（纯文字）
             tvChannel.text = bill.channelName
-            if (bill.channelName.isNullOrEmpty() || bill.channelName == "—") {
-                // 可以设置占位或隐藏，但这里保持显示空白
-            }
 
             // 金额
             val yuan = bill.amount / 100.0
@@ -160,7 +161,7 @@ class BillListAdapter(
             }
 
             // 备注
-            if (bill.remark.isNullOrEmpty()) {
+            if (bill.remark.isEmpty()) {
                 tvRemark.visibility = View.GONE
             } else {
                 tvRemark.visibility = View.VISIBLE
