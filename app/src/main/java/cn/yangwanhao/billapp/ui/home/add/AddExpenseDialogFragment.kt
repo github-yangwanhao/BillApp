@@ -57,10 +57,16 @@ class AddExpenseDialogFragment : BottomSheetDialogFragment() {
     private val calendar = Calendar.getInstance()
     private val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
     private val monthFormat = SimpleDateFormat("yyyyMM", Locale.getDefault())
+    private val normalRemarkText = "请输入或选择备注"
+    private val installmentRemarkText = "请输入或选择备注模板"
 
-    private val installmentPreviewAdapter = InstallmentPreviewAdapter { bill, position ->
-        showEditRemarkDialog(bill, position)
+    // 🔥 新适配器（行内编辑）
+    private val installmentPreviewAdapter = InstallmentPreviewAdapter { position, newRemark ->
+        // 备注修改回调：更新数据
+        currentInstallmentResult?.bills?.get(position)?.remark = newRemark
+        // 不需要刷新整个列表，因为数据已更新
     }
+
     private var currentInstallmentResult: InstallmentResult? = null
 
     private var onSaveSuccess: (() -> Unit)? = null
@@ -87,6 +93,7 @@ class AddExpenseDialogFragment : BottomSheetDialogFragment() {
         loadDataFromDatabase()
         setupListeners()
         setupInstallmentPreview()
+        setupBatchRemark()
         switchToNormalMode()
     }
 
@@ -111,6 +118,7 @@ class AddExpenseDialogFragment : BottomSheetDialogFragment() {
         binding.etDate.setText(dateFormat.format(calendar.time))
         binding.tvMonthRangeDisplay.text = "请选择"
 
+        // 消费金额：保留原有逻辑（初始"0"，点击清空，失焦恢复"0"）
         binding.etAmount.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
                 if (binding.etAmount.text.toString() == "0") {
@@ -123,14 +131,30 @@ class AddExpenseDialogFragment : BottomSheetDialogFragment() {
             }
         }
 
+        // 🔥 备注输入框：初始文本"请输入备注"，点击清空，失焦为空恢复"请输入备注"
         binding.etRemark.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
-                if (binding.etRemark.text.toString() == "请输入或选择备注") {
+                // 获得焦点时，如果内容是占位文本，清空
+                if (binding.etRemark.text.toString() == normalRemarkText) {
                     binding.etRemark.text?.clear()
                 }
             } else {
+                // 失去焦点时，如果内容为空，恢复占位文本
                 if (binding.etRemark.text.isNullOrEmpty()) {
-                    binding.etRemark.setText("请输入或选择备注")
+                    binding.etRemark.setText(normalRemarkText)
+                }
+            }
+        }
+
+        // 🔥 备注模板输入框：类似处理
+        binding.etRemarkTemplate.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                if (binding.etRemarkTemplate.text.toString() == installmentRemarkText) {
+                    binding.etRemarkTemplate.text?.clear()
+                }
+            } else {
+                if (binding.etRemarkTemplate.text.isNullOrEmpty()) {
+                    binding.etRemarkTemplate.setText(installmentRemarkText)
                 }
             }
         }
@@ -181,6 +205,7 @@ class AddExpenseDialogFragment : BottomSheetDialogFragment() {
             showMonthRangePicker()
         }
 
+        // 金额变化时自动更新分期预览
         binding.etAmount.addTextChangedListener(object : android.text.TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
@@ -247,6 +272,15 @@ class AddExpenseDialogFragment : BottomSheetDialogFragment() {
                 endMonth = endMonth,
                 baseRemark = baseRemark
             )
+
+            // 🔥 自动应用模板（如果模板不为空）
+            val template = binding.etRemarkTemplate.text.toString().trim()
+            if (template.isNotEmpty()) {
+                result.bills.forEachIndexed { index, bill ->
+                    bill.remark = "$template（第${index + 1}期）"
+                }
+            }
+
             currentInstallmentResult = result
             installmentPreviewAdapter.submitList(result.bills)
             binding.rvInstallmentPreview.visibility = View.VISIBLE
@@ -259,36 +293,44 @@ class AddExpenseDialogFragment : BottomSheetDialogFragment() {
         }
     }
 
+    // 🔥 批量备注功能
+    private fun setupBatchRemark() {
+        binding.btnApplyToAll.setOnClickListener {
+            val template = binding.etRemarkTemplate.text.toString().trim()
+            if (template.isEmpty()) {
+                Toast.makeText(requireContext(), "请先输入备注模板", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            val result = currentInstallmentResult
+            if (result == null || result.bills.isEmpty()) {
+                Toast.makeText(requireContext(), "请先计算分期账单", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            // 应用到所有分期
+            result.bills.forEachIndexed { index, bill ->
+                bill.remark = "$template（第${index + 1}期）"
+            }
+
+            // 刷新预览列表
+            installmentPreviewAdapter.refreshData(result.bills)
+
+            Toast.makeText(requireContext(), "已应用到 ${result.bills.size} 期", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     private fun setupInstallmentPreview() {
         binding.rvInstallmentPreview.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = installmentPreviewAdapter
-            // 🔥 保持默认嵌套滚动行为，配合 NestedScrollView 工作
-            // 不设置 isNestedScrollingEnabled 以保持默认 true
+            // 保持默认嵌套滚动行为，配合 NestedScrollView 工作
         }
     }
 
     @Suppress("DEPRECATION")
     private fun updateInstallmentPreview() {
-        // 保留空实现
-    }
-
-    private fun showEditRemarkDialog(bill: InstallmentBillDto, position: Int) {
-        val editText = EditText(requireContext())
-        editText.setText(bill.remark)
-        editText.hint = "输入备注"
-        AlertDialog.Builder(requireContext())
-            .setTitle("编辑备注（第${bill.installmentIndex}期）")
-            .setView(editText)
-            .setPositiveButton("确定") { _, _ ->
-                val newRemark = editText.text.toString().trim()
-                if (newRemark.isNotEmpty()) {
-                    bill.remark = newRemark
-                    installmentPreviewAdapter.notifyItemChanged(position)
-                }
-            }
-            .setNegativeButton("取消", null)
-            .show()
+        // 保留空实现（兼容旧调用）
     }
 
     private fun switchToNormalMode() {
@@ -297,7 +339,9 @@ class AddExpenseDialogFragment : BottomSheetDialogFragment() {
         binding.rvInstallmentPreview.visibility = View.GONE
         binding.tvInstallmentCountHint.visibility = View.GONE
         binding.remarkLayout.visibility = View.VISIBLE
-        binding.etRemark.hint = "备注"
+        // 🔥 隐藏备注模板区域
+        binding.llRemarkTemplate.visibility = View.GONE
+        binding.etRemark.setText(normalRemarkText)
         currentInstallmentResult = null
     }
 
@@ -305,6 +349,9 @@ class AddExpenseDialogFragment : BottomSheetDialogFragment() {
         binding.dateLayout.visibility = View.GONE
         binding.installmentParams.visibility = View.VISIBLE
         binding.remarkLayout.visibility = View.GONE
+        // 🔥 显示备注模板区域
+        binding.llRemarkTemplate.visibility = View.VISIBLE
+        binding.etRemarkTemplate.setText(installmentRemarkText)
         if (binding.tvMonthRangeDisplay.text.toString() != "请选择") {
             updateInstallmentPreviewFromCurrentState()
         }
@@ -332,6 +379,9 @@ class AddExpenseDialogFragment : BottomSheetDialogFragment() {
     }
 
     private fun saveBill() {
+        // 退出编辑模式，保存当前正在编辑的备注
+        installmentPreviewAdapter.exitEditing()
+
         if (binding.btnNormalMode.isSelected) {
             saveNormalBill()
         } else {
@@ -360,6 +410,10 @@ class AddExpenseDialogFragment : BottomSheetDialogFragment() {
         }
         val billMonth = payDate / 100
         val remark = binding.etRemark.text.toString().trim()
+        if (!isRemarkValid(remark)) {
+            Toast.makeText(requireContext(), "请输入备注", Toast.LENGTH_SHORT).show()
+            return
+        }
         val currentTime = Date()
 
         val bill = ConsumeBill(
@@ -414,6 +468,13 @@ class AddExpenseDialogFragment : BottomSheetDialogFragment() {
         if (selectedChannel == null) {
             Toast.makeText(requireContext(), "请选择支付方式", Toast.LENGTH_SHORT).show()
             return
+        }
+
+        for (bill in result.bills) {
+            if (!isRemarkValid(bill.remark)) {
+                Toast.makeText(requireContext(), "第${bill.installmentIndex}期备注不能为空", Toast.LENGTH_SHORT).show()
+                return
+            }
         }
 
         val today = dateFormat.format(Calendar.getInstance().time).replace("-", "").toInt()
@@ -494,6 +555,7 @@ class AddExpenseDialogFragment : BottomSheetDialogFragment() {
         ).show()
     }
 
+    // ========== 备注快捷标签 ==========
     private fun loadRemarkTags() {
         binding.llRemarkTags.removeAllViews()
         if (remarkList.isEmpty()) return
@@ -502,7 +564,10 @@ class AddExpenseDialogFragment : BottomSheetDialogFragment() {
             val tagView = layoutInflater.inflate(R.layout.item_remark_tag, binding.llRemarkTags, false) as TextView
             tagView.text = remark.dictValue
             tagView.setOnClickListener {
+                // 直接替换备注内容（如果当前是分期模式，同时更新模板框和预览）
                 binding.etRemark.setText(remark.dictValue)
+                // 如果分期模式，也更新模板框
+                binding.etRemarkTemplate.setText(remark.dictValue)
                 if (binding.btnInstallmentMode.isSelected) {
                     updateInstallmentPreviewFromCurrentState()
                 }
@@ -538,5 +603,15 @@ class AddExpenseDialogFragment : BottomSheetDialogFragment() {
         binding.btnNormalMode.backgroundTintList = ColorStateList.valueOf(Color.WHITE)
         binding.btnNormalMode.setTextColor("#999999".toColorInt())
         switchToInstallmentMode()
+    }
+
+    /**
+     * 校验备注是否有效（非空、非仅空白、非默认占位）
+     */
+    private fun isRemarkValid(remark: String): Boolean {
+        val trimmed = remark.trim()
+        return trimmed.isNotEmpty() &&
+                trimmed != normalRemarkText &&
+                !trimmed.startsWith(installmentRemarkText)
     }
 }
