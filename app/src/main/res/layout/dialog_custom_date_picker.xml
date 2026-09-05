@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/bottom_sheet_rounded_top"
+    android:elevation="8dp"
+    android:padding="16dp">
+
+    <!-- 标题 -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="选择日期"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="#333333"
+        android:layout_gravity="center"
+        android:paddingBottom="8dp" />
+
+    <!-- 年月切换栏 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingVertical="8dp">
+
+        <TextView
+            android:id="@+id/tvPrevMonth"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:text="‹"
+            android:textSize="24sp"
+            android:textColor="#1976D2"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true"
+            android:contentDescription="上一月" />
+
+        <TextView
+            android:id="@+id/tvYearMonth"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="2026年9月"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:gravity="center" />
+
+        <TextView
+            android:id="@+id/tvNextMonth"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:text="›"
+            android:textSize="24sp"
+            android:textColor="#1976D2"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true"
+            android:contentDescription="下一月" />
+
+    </LinearLayout>
+
+    <!-- 周几标题（中文） -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingVertical="8dp">
+
+        <TextView style="@style/DayOfWeekStyle" android:text="一" />
+        <TextView style="@style/DayOfWeekStyle" android:text="二" />
+        <TextView style="@style/DayOfWeekStyle" android:text="三" />
+        <TextView style="@style/DayOfWeekStyle" android:text="四" />
+        <TextView style="@style/DayOfWeekStyle" android:text="五" />
+        <TextView style="@style/DayOfWeekStyle" android:text="六" />
+        <TextView style="@style/DayOfWeekStyle" android:text="日" />
+
+    </LinearLayout>
+
+    <!-- 日期网格：高度设为 0dp + weight=1 填满剩余空间 -->
+    <android.widget.GridLayout
+        android:id="@+id/glDays"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:rowCount="6"
+        android:columnCount="7"
+        android:layout_marginBottom="16dp" />
+
+    <!-- 底部按钮 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingTop="8dp">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnCancel"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="8dp"
+            android:text="取消"
+            android:textColor="#666666"
+            app:cornerRadius="8dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnConfirm"
+            style="@style/Widget.MaterialComponents.Button"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:text="确定"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="@color/colorAccent"
+            app:cornerRadius="8dp" />
+
+    </LinearLayout>
+
+</LinearLayout>

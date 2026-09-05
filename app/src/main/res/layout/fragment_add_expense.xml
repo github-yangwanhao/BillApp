@@ -98,45 +98,28 @@
                 android:visibility="gone"
                 android:layout_marginBottom="12dp">
 
-                <!-- 月份范围选择入口 -->
-                <LinearLayout
-                    android:id="@+id/llMonthRangePicker"
+                <!-- 月份范围选择入口（TextInputLayout 风格，与日期选择器统一） -->
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:orientation="horizontal"
-                    android:background="@drawable/card_light_gray"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="12dp"
-                    android:gravity="center_vertical"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:layout_marginBottom="8dp">
+                    android:layout_height="wrap_content"
+                    android:hint="选择分期月份范围"
+                    app:endIconMode="custom"
+                    app:endIconDrawable="@drawable/ic_arrow_down"
+                    android:layout_marginBottom="8dp"
+                    android:id="@+id/llMonthRangePicker">
 
-                    <TextView
-                        android:layout_width="0dp"
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etMonthRangePicker"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="📅 选择分期月份范围"
-                        android:textSize="14sp"
-                        android:textColor="#666666" />
-
-                    <TextView
-                        android:id="@+id/tvMonthRangeDisplay"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="请选择"
-                        android:textSize="14sp"
-                        android:textColor="#1976D2"
-                        android:textStyle="bold"
-                        android:layout_marginEnd="8dp" />
-
-                    <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:src="@drawable/ic_arrow_down"
-                        android:alpha="0.6" />
-
-                </LinearLayout>
+                        android:inputType="none"
+                        android:focusable="false"
+                        android:clickable="true"
+                        android:focusableInTouchMode="false"
+                        android:textSize="16sp"
+                        android:text="请选择" />
+                </com.google.android.material.textfield.TextInputLayout>
 
                 <!-- 期数提示 -->
                 <TextView

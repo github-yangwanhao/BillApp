@@ -55,6 +55,22 @@ class MonthRangePickerDialog(context: Context) : Dialog(context) {
         tvRange = findViewById(R.id.tvSelectedRange)
         btnCancel = findViewById(R.id.btnCancel)
         btnConfirm = findViewById(R.id.btnConfirm)
+
+        // 🔥 默认选中当前月作为起始月份
+        val currentCalendar = Calendar.getInstance()
+        startYear = currentCalendar.get(Calendar.YEAR)
+        startMonth = currentCalendar.get(Calendar.MONTH) + 1
+
+        setupRecyclerView()
+        setupListeners()
+
+        val currentYear = Calendar.getInstance().get(Calendar.YEAR)
+        val currentPos = yearRange.indexOf(currentYear)
+        if (currentPos >= 0) {
+            rvYears.scrollToPosition(currentPos)
+        }
+
+        updateRangeText()
     }
 
     private fun setupRecyclerView() {

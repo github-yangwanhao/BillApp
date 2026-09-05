@@ -25,4 +25,15 @@
         <item name="cornerSizeTopRight">16dp</item>
         <item name="cornerSizeBottomRight">16dp</item>
     </style>
+
+    <style name="DayOfWeekStyle">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">#999999</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:paddingVertical">4dp</item>
+    </style>
 </resources>
