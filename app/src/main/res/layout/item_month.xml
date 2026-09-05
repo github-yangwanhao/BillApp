@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/tvMonth"
+    android:layout_width="match_parent"
+    android:layout_height="44dp"
+    android:gravity="center"
+    android:textSize="14sp"
+    android:textColor="#333333"
+    android:background="@drawable/bg_month_normal"
+    android:clickable="true"
+    android:focusable="true" />

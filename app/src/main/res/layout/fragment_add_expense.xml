@@ -19,15 +19,13 @@
         android:gravity="center"
         android:paddingBottom="12dp" />
 
-    <!-- ========== 普通/分期切换（放在金额上方） ========== -->
-    <!-- ========== 普通/分期切换（手动控制） ========== -->
+    <!-- 常规/分期切换 -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:layout_marginBottom="12dp">
 
-        <!-- 常规按钮 -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnNormalMode"
             style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
@@ -43,7 +41,6 @@
             android:backgroundTint="#E8E8E8"
             android:textColor="#333333" />
 
-        <!-- 分期按钮 -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnInstallmentMode"
             style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
@@ -61,8 +58,8 @@
 
     </LinearLayout>
 
-    <!-- ========== 可滚动内容 ========== -->
-    <ScrollView
+    <!-- ========== 🔥 使用 NestedScrollView ========== -->
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
@@ -92,61 +89,74 @@
                     android:text="0" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- ========== 分期参数（默认隐藏） ========== -->
+            <!-- 分期参数（默认隐藏） -->
             <LinearLayout
                 android:id="@+id/installmentParams"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
+                android:orientation="vertical"
                 android:visibility="gone"
                 android:layout_marginBottom="12dp">
 
-                <!-- 期数 -->
-                <com.google.android.material.textfield.TextInputLayout
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginEnd="8dp"
-                    android:hint="期数">
+                <!-- 月份范围选择入口 -->
+                <LinearLayout
+                    android:id="@+id/llMonthRangePicker"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:orientation="horizontal"
+                    android:background="@drawable/card_light_gray"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="12dp"
+                    android:gravity="center_vertical"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:layout_marginBottom="8dp">
 
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/etInstallmentCount"
-                        android:layout_width="match_parent"
+                    <TextView
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:inputType="number"
-                        android:textSize="16sp"
-                        android:text="0" />
-                </com.google.android.material.textfield.TextInputLayout>
+                        android:layout_weight="1"
+                        android:text="📅 选择分期月份范围"
+                        android:textSize="14sp"
+                        android:textColor="#666666" />
 
-                <!-- 开始月份 -->
-                <com.google.android.material.textfield.TextInputLayout
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginStart="8dp"
-                    android:hint="开始月份"
-                    app:endIconMode="custom"
-                    app:endIconDrawable="@drawable/ic_calendar">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/etStartMonth"
-                        android:layout_width="match_parent"
+                    <TextView
+                        android:id="@+id/tvMonthRangeDisplay"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:inputType="none"
-                        android:focusable="false"
-                        android:clickable="true"
-                        android:focusableInTouchMode="false"
-                        android:textSize="16sp" />
-                </com.google.android.material.textfield.TextInputLayout>
+                        android:text="请选择"
+                        android:textSize="14sp"
+                        android:textColor="#1976D2"
+                        android:textStyle="bold"
+                        android:layout_marginEnd="8dp" />
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/ic_arrow_down"
+                        android:alpha="0.6" />
+
+                </LinearLayout>
+
+                <!-- 期数提示 -->
+                <TextView
+                    android:id="@+id/tvInstallmentCountHint"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="共 0 期"
+                    android:textSize="14sp"
+                    android:textColor="#999999"
+                    android:gravity="center"
+                    android:paddingTop="4dp"
+                    android:visibility="gone" />
+
             </LinearLayout>
 
-            <!-- ========== 分期预览列表 ========== -->
+            <!-- 分期预览列表 -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvInstallmentPreview"
                 android:layout_width="match_parent"
-                android:layout_height="150dp"
+                android:layout_height="wrap_content"
                 android:scrollbars="vertical"
                 android:visibility="gone"
                 android:background="@drawable/card_light_gray"
@@ -154,7 +164,7 @@
                 android:layout_marginBottom="12dp"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
-            <!-- ========== 日期（普通模式用） ========== -->
+            <!-- 日期（普通模式用） -->
             <com.google.android.material.textfield.TextInputLayout
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
@@ -176,7 +186,7 @@
                     android:textSize="16sp" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- ========== 分类 ========== -->
+            <!-- 分类 -->
             <com.google.android.material.textfield.TextInputLayout
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
@@ -197,7 +207,7 @@
                     android:textSize="16sp" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- ========== 支付方式 ========== -->
+            <!-- 支付方式 -->
             <com.google.android.material.textfield.TextInputLayout
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
@@ -218,7 +228,7 @@
                     android:textSize="16sp" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- ========== 备注（普通模式显示） ========== -->
+            <!-- 备注 -->
             <com.google.android.material.textfield.TextInputLayout
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
@@ -237,7 +247,7 @@
                     android:text="请输入或选择备注"/>
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- ========== 备注快捷标签 ========== -->
+            <!-- 备注快捷标签 -->
             <HorizontalScrollView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -253,9 +263,9 @@
             </HorizontalScrollView>
 
         </LinearLayout>
-    </ScrollView>
+    </androidx.core.widget.NestedScrollView>
 
-    <!-- ========== 底部按钮（固定在底部） ========== -->
+    <!-- 底部按钮 -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -274,9 +284,7 @@
             android:textSize="20sp"
             android:textColor="#388E3C"
             android:backgroundTint="@color/colorCancel"
-            app:cornerRadius="0dp"
-            android:clickable="true"
-            android:focusable="true" />
+            app:cornerRadius="0dp" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/tvSave"
