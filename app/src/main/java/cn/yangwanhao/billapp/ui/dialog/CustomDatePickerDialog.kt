@@ -9,6 +9,7 @@ import android.view.WindowManager
 import android.view.animation.DecelerateInterpolator
 import android.widget.GridLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -17,6 +18,7 @@ import java.util.Calendar
 
 class CustomDatePickerDialog(
     context: Context,
+    private val maxDate: Calendar? = null,  // 最大可选日期，null表示不限制
     private val onDateSelected: (year: Int, month: Int, day: Int) -> Unit
 ) : BottomSheetDialog(context) {
 
@@ -73,13 +75,30 @@ class CustomDatePickerDialog(
         // 下一月
         findViewById<TextView>(R.id.tvNextMonth)?.setOnClickListener {
             if (isAnimating) return@setOnClickListener
+
+            // 计算下一个月
+            var newYear = displayYear
+            var newMonth = displayMonth + 1
+            if (newMonth > 11) {
+                newMonth = 0
+                newYear++
+            }
+
+            // 检查是否超过最大日期所在月份
+            if (maxDate != null) {
+                val maxYear = maxDate.get(Calendar.YEAR)
+                val maxMonth = maxDate.get(Calendar.MONTH)
+                if (newYear > maxYear || (newYear == maxYear && newMonth > maxMonth)) {
+                    // 已经到达最大月份，不允许继续
+                    Toast.makeText(context, "不能选择未来的月份", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
+            }
+
             isAnimating = true
             animateOut {
-                displayMonth++
-                if (displayMonth > 11) {
-                    displayMonth = 0
-                    displayYear++
-                }
+                displayYear = newYear
+                displayMonth = newMonth
                 renderCalendar()
                 animateIn { isAnimating = false }
             }
@@ -158,22 +177,20 @@ class CustomDatePickerDialog(
 
         val grid = findViewById<GridLayout>(R.id.glDays)
         grid?.removeAllViews()
-        grid?.translationX = 0f // 确保平移归零
+        grid?.translationX = 0f
 
         // 获取当月第一天是星期几（1=星期一，7=星期日）
         val firstDayCalendar = Calendar.getInstance().apply {
             set(displayYear, displayMonth, 1)
         }
         val firstDayOfWeek = firstDayCalendar.get(Calendar.DAY_OF_WEEK)
-        // 转换为中国习惯：周一=1，周日=7
         val firstDayInChina = if (firstDayOfWeek == Calendar.SUNDAY) 7 else firstDayOfWeek - 1
 
-        // 当月天数
         val daysInMonth = firstDayCalendar.getActualMaximum(Calendar.DAY_OF_MONTH)
 
-        // 填充空白格
+        // 填充空白格（禁用）
         for (i in 1 until firstDayInChina) {
-            val emptyView = createDayView("", isToday = false, isSelected = false)
+            val emptyView = createDayView("", isToday = false, isSelected = false, isDisabled = true)
             grid?.addView(emptyView)
         }
 
@@ -187,13 +204,23 @@ class CustomDatePickerDialog(
                     displayMonth == selectedMonth &&
                     day == selectedDay
 
-            val dayView = createDayView(day.toString(), isToday, isSelected)
-            val position = day
-            dayView.setOnClickListener {
-                selectedYear = displayYear
-                selectedMonth = displayMonth
-                selectedDay = position
-                renderCalendar()
+            // 判断是否超过最大日期
+            val isDisabled = maxDate?.let { max ->
+                val cal = Calendar.getInstance().apply {
+                    set(displayYear, displayMonth, day)
+                }
+                cal.after(max)
+            } ?: false
+
+            val dayView = createDayView(day.toString(), isToday, isSelected, isDisabled)
+            if (!isDisabled) {
+                val position = day
+                dayView.setOnClickListener {
+                    selectedYear = displayYear
+                    selectedMonth = displayMonth
+                    selectedDay = position
+                    renderCalendar()
+                }
             }
             grid?.addView(dayView)
         }
@@ -204,9 +231,9 @@ class CustomDatePickerDialog(
     private fun createDayView(
         text: String,
         isToday: Boolean = false,
-        isSelected: Boolean = false
+        isSelected: Boolean = false,
+        isDisabled: Boolean = false
     ): TextView {
-        // 将 dp 值转换为像素
         val dpToPx = { dp: Float ->
             TypedValue.applyDimension(
                 TypedValue.COMPLEX_UNIT_DIP, dp, context.resources.displayMetrics
@@ -217,38 +244,39 @@ class CustomDatePickerDialog(
             this.text = text
             gravity = android.view.Gravity.CENTER
             textSize = 16f
-            // 关闭字体额外内边距，防止文字被截断
             includeFontPadding = false
-            // 4dp 左右 + 8dp 上下（dp → px 转换）
             setPadding(dpToPx(4f), dpToPx(8f), dpToPx(4f), dpToPx(8f))
 
             layoutParams = GridLayout.LayoutParams().apply {
                 width = 0
-                // 50dp → px，保证文字完整显示
                 height = dpToPx(50f)
                 columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
                 rowSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
-                // 4dp 间距（dp → px 转换）
                 setMargins(dpToPx(4f), dpToPx(4f), dpToPx(4f), dpToPx(4f))
             }
 
-            // 使用 ContextCompat.getDrawable 替代已废弃的 context.getDrawable
-            background = when {
-                isSelected -> ContextCompat.getDrawable(context, R.drawable.bg_range_start)
-                isToday -> ContextCompat.getDrawable(context, R.drawable.bg_day_today)
-                else -> ContextCompat.getDrawable(context, R.drawable.bg_month_normal)
+            if (isDisabled) {
+                background = ContextCompat.getDrawable(context, R.drawable.bg_day_disabled)
+                setTextColor(ContextCompat.getColor(context, R.color.day_text_disabled))
+                isClickable = false
+                isFocusable = false
+            } else {
+                background = when {
+                    isSelected -> ContextCompat.getDrawable(context, R.drawable.bg_range_start)
+                    isToday -> ContextCompat.getDrawable(context, R.drawable.bg_day_today)
+                    else -> ContextCompat.getDrawable(context, R.drawable.bg_month_normal)
+                }
+                setTextColor(
+                    when {
+                        isSelected -> ContextCompat.getColor(context, android.R.color.white)
+                        isToday -> ContextCompat.getColor(context, android.R.color.white)
+                        else -> ContextCompat.getColor(context, R.color.day_text_normal)
+                    }
+                )
+                isClickable = true
+                isFocusable = true
             }
 
-            // 使用 ContextCompat.getColor 替代已废弃的 setTextColor(int)
-            setTextColor(
-                when {
-                    isSelected -> ContextCompat.getColor(context, android.R.color.white)
-                    isToday -> ContextCompat.getColor(context, android.R.color.white)
-                    else -> ContextCompat.getColor(context, R.color.day_text_normal)
-                }
-            )
-
-            // 无障碍描述（去掉开头的多余空格）
             contentDescription = if (text.isNotEmpty()) {
                 "${displayYear}年${displayMonth + 1}月${text.toInt()}日"
             } else {

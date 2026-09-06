@@ -1,6 +1,6 @@
 <resources>
     <style name="Theme.BillApp" parent="Theme.MaterialComponents.Light.NoActionBar">
-        <item name="colorPrimary">#6366F1</item>
+        <!--<item name="colorPrimary">#6366F1</item>-->
         <item name="colorPrimaryVariant">#4F46E5</item>
         <item name="colorOnPrimary">#FFFFFF</item>
         <item name="colorSecondary">#6366F1</item>

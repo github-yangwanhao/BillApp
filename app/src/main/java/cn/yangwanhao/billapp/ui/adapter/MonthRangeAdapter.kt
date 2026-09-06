@@ -2,17 +2,20 @@ package cn.yangwanhao.billapp.ui.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import cn.yangwanhao.billapp.R
 import cn.yangwanhao.billapp.databinding.ItemMonthBinding
 
 class MonthRangeAdapter(
-    private val year: Int,                      // 当前年份
+    private val year: Int,
     private var startYear: Int?,
     private var startMonth: Int?,
     private var endYear: Int?,
     private var endMonth: Int?,
-    private val onMonthClick: (Int) -> Unit
+    private val onMonthClick: (Int) -> Unit,
+    private val maxYearMonth: Int? = null  // 新增：最大可选年月（yyyyMM），null表示不限制
 ) : RecyclerView.Adapter<MonthRangeAdapter.ViewHolder>() {
 
     private val months = (1..12).toList()
@@ -28,28 +31,43 @@ class MonthRangeAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val month = months[position]
-        holder.binding.tvMonth.text = "$month 月"
+        val tvMonth = holder.binding.tvMonth
 
-        // 判断当前月份是否在选中的范围内（必须年月同时匹配）
+        tvMonth.text = "$month 月"
+
+        // 判断是否禁用（超过最大年月）
+        val currentYearMonth = year * 100 + month
+        val isDisabled = maxYearMonth != null && currentYearMonth > maxYearMonth
+
+        if (isDisabled) {
+            // 禁用状态：灰色背景，不可点击
+            tvMonth.setBackgroundResource(R.drawable.bg_month_disabled)
+            tvMonth.setTextColor(ContextCompat.getColor(tvMonth.context, R.color.day_text_disabled))
+            tvMonth.isClickable = false
+            tvMonth.isFocusable = false
+            tvMonth.setOnClickListener(null)
+            return
+        }
+
+        // 正常状态：判断选中区间
         val isStart = startYear != null && startMonth != null &&
                 year == startYear && month == startMonth
         val isEnd = endYear != null && endMonth != null &&
                 year == endYear && month == endMonth
 
-        // 判断是否在区间内（包括起始和结束）
         val isInRange = startYear != null && startMonth != null &&
                 endYear != null && endMonth != null &&
                 isBetween(year, month, startYear!!, startMonth!!, endYear!!, endMonth!!)
 
         // 设置背景
         val bgRes = when {
-            isStart && isEnd -> R.drawable.bg_range_start  // 只有一个月
+            isStart && isEnd -> R.drawable.bg_range_start
             isStart -> R.drawable.bg_range_start
             isEnd -> R.drawable.bg_range_end
             isInRange -> R.drawable.bg_range_middle
             else -> R.drawable.bg_month_normal
         }
-        holder.binding.tvMonth.setBackgroundResource(bgRes)
+        tvMonth.setBackgroundResource(bgRes)
 
         // 文字颜色
         val textColor = if (isStart || isEnd || isInRange) {
@@ -57,9 +75,11 @@ class MonthRangeAdapter(
         } else {
             android.graphics.Color.parseColor("#333333")
         }
-        holder.binding.tvMonth.setTextColor(textColor)
+        tvMonth.setTextColor(textColor)
 
-        holder.itemView.setOnClickListener {
+        tvMonth.isClickable = true
+        tvMonth.isFocusable = true
+        tvMonth.setOnClickListener {
             onMonthClick(month)
         }
     }

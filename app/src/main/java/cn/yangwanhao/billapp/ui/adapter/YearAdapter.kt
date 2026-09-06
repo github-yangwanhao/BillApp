@@ -4,7 +4,6 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import cn.yangwanhao.billapp.R
 import cn.yangwanhao.billapp.databinding.ItemYearMonthsBinding
 
 class YearAdapter(
@@ -13,7 +12,8 @@ class YearAdapter(
     private var startMonth: Int?,
     private var endYear: Int?,
     private var endMonth: Int?,
-    private val onMonthSelected: (year: Int, month: Int) -> Unit
+    private val onMonthSelected: (year: Int, month: Int) -> Unit,
+    private val maxYearMonth: Int? = null  // 新增
 ) : RecyclerView.Adapter<YearAdapter.YearViewHolder>() {
 
     private val years = yearRange.toList()
@@ -42,14 +42,14 @@ class YearAdapter(
                 endMonth = endMonth,
                 onMonthClick = { month ->
                     onMonthSelected(year, month)
-                }
+                },
+                maxYearMonth = maxYearMonth  // 传递
             )
             holder.binding.rvMonths.layoutManager = GridLayoutManager(
                 holder.itemView.context, 4
             )
             holder.binding.rvMonths.adapter = holder.monthAdapter
         } else {
-            // 更新选中状态（传入当前年份的适配器）
             holder.monthAdapter?.updateSelection(startYear, startMonth, endYear, endMonth)
         }
     }

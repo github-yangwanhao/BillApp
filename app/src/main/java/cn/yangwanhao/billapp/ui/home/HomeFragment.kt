@@ -10,9 +10,9 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.widget.ViewPager2
 import cn.yangwanhao.billapp.MainActivity
-import cn.yangwanhao.billapp.R
 import cn.yangwanhao.billapp.databinding.FragmentHomeBinding
 import cn.yangwanhao.billapp.ui.home.add.AddExpenseDialogFragment
+import cn.yangwanhao.billapp.ui.home.add.IncomeAddDialogFragment
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -25,6 +25,8 @@ class HomeFragment : Fragment() {
 
     val consumeViewModel: ConsumeBillViewModel by viewModels()
     val incomeViewModel: IncomeBillViewModel by viewModels()
+
+    private var currentTab = 0  // 0=支出, 1=收入
 
     private val currentMonth: Int
         get() {
@@ -62,61 +64,11 @@ class HomeFragment : Fragment() {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
                 updateTabSelection(position)
+                updateFabStyle(position)
             }
         })
     }
 
-    // ============================================================
-    // Tab 切换逻辑（按钮只负责切换 ViewPager）
-    // ============================================================
-    /*private fun setupTabToggle() {
-        // 点击支出按钮 → 切换到第 0 页
-        binding.homeTabExpense.setOnClickListener {
-            binding.homeViewPager.currentItem = 0
-        }
-
-        // 点击收入按钮 → 切换到第 1 页
-        binding.homeTabIncome.setOnClickListener {
-            binding.homeViewPager.currentItem = 1
-        }
-    }
-
-    *//**
-     * 更新 Tab 样式和选中状态
-     * @param position 0=支出, 1=收入
-     *//*
-    private fun updateTabSelection(position: Int) {
-        val isExpense = position == 0
-
-        // 🔥 同步 ToggleGroup 的选中状态（让按钮高亮）
-        if (isExpense) {
-            binding.homeTabToggle.check(R.id.homeTabExpense)
-        } else {
-            binding.homeTabToggle.check(R.id.homeTabIncome)
-        }
-
-        // 🔥 更新样式（背景色 + 文字颜色）
-        binding.homeTabExpense.apply {
-            backgroundTintList = if (isExpense) {
-                android.content.res.ColorStateList.valueOf(android.graphics.Color.WHITE)
-            } else {
-                android.content.res.ColorStateList.valueOf(android.graphics.Color.TRANSPARENT)
-            }
-            setTextColor(if (isExpense) android.graphics.Color.parseColor("#6366F1") else android.graphics.Color.parseColor("#868E96"))
-        }
-
-        binding.homeTabIncome.apply {
-            backgroundTintList = if (!isExpense) {
-                android.content.res.ColorStateList.valueOf(android.graphics.Color.WHITE)
-            } else {
-                android.content.res.ColorStateList.valueOf(android.graphics.Color.TRANSPARENT)
-            }
-            setTextColor(if (!isExpense) android.graphics.Color.parseColor("#6366F1") else android.graphics.Color.parseColor("#868E96"))
-        }
-    }*/
-    // ============================================================
-// Tab 切换逻辑（完全手动控制，不依赖 ToggleGroup）
-// ============================================================
     private fun setupTabToggle() {
         // 默认选中支出
         updateTabSelection(0)
@@ -253,5 +205,44 @@ class HomeFragment : Fragment() {
         super.onDestroyView()
         (activity as? MainActivity)?.homeFragment = null
         _binding = null
+    }
+
+    private fun updateFabStyle(position: Int) {
+        val fab = binding.homeFabAdd
+        if (position == 0) {
+            // 支出：红色
+            fab.backgroundTintList = android.content.res.ColorStateList.valueOf(
+                android.graphics.Color.parseColor("#D32F2F")
+            )
+            fab.setOnClickListener {
+                showExpenseDialog()
+            }
+        } else {
+            // 收入：绿色
+            fab.backgroundTintList = android.content.res.ColorStateList.valueOf(
+                android.graphics.Color.parseColor("#2B8A3E")
+            )
+            fab.setOnClickListener {
+                showIncomeDialog()
+            }
+        }
+    }
+
+    private fun showExpenseDialog() {
+        val dialog = AddExpenseDialogFragment()
+        dialog.setOnSaveSuccessListener {
+            consumeViewModel.refresh()
+            loadStats()
+        }
+        dialog.show(childFragmentManager, "AddExpenseDialog")
+    }
+
+    private fun showIncomeDialog() {
+        val dialog = IncomeAddDialogFragment()
+        dialog.setOnSaveSuccessListener {
+            incomeViewModel.refresh()
+            // 收入统计暂未实现，可留空
+        }
+        dialog.show(childFragmentManager, "IncomeAddDialog")
     }
 }

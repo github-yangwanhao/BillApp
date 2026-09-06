@@ -14,4 +14,9 @@ class IncomeBillRepository(
     suspend fun getBillsPaged(limit: Int, offset: Int): List<IncomeBill> {
         return incomeBillDao.getBillsPaged(limit, offset)
     }
+
+    // 新增
+    suspend fun addBill(bill: IncomeBill): Long {
+        return incomeBillDao.insert(bill)
+    }
 }

@@ -1,0 +1,313 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F8F9FC">
+
+    <!-- ==================== 顶部导航栏 ==================== -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:orientation="horizontal"
+        android:background="#FFFFFF"
+        android:elevation="2dp"
+        android:gravity="center_vertical"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp">
+
+        <TextView
+            android:id="@+id/tvCancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="取消"
+            android:textSize="16sp"
+            android:textColor="#2B8A3E"
+            android:fontFamily="sans-serif-medium"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="8dp" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="记一笔"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="#1C1C1E"
+            android:fontFamily="sans-serif-medium"
+            android:gravity="center" />
+
+        <TextView
+            android:id="@+id/tvClose"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="✕"
+            android:textSize="20sp"
+            android:textColor="#ADB5BD"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="8dp" />
+    </LinearLayout>
+
+    <!-- ==================== 可滚动内容 ==================== -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true"
+        android:padding="16dp"
+        android:clipToPadding="false">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- ========== 金额卡片 ========== -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_white_rounded"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="8dp"
+                android:minHeight="56dp"
+                android:elevation="4dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="¥"
+                    android:textSize="24sp"
+                    android:textColor="#868E96"
+                    android:fontFamily="sans-serif-medium" />
+
+                <EditText
+                    android:id="@+id/etAmount"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:inputType="numberDecimal"
+                    android:textSize="32sp"
+                    android:textStyle="bold"
+                    android:textColor="#1C1C1E"
+                    android:fontFamily="sans-serif-medium"
+                    android:text="0"
+                    android:background="@null"
+                    android:backgroundTint="@null"
+                    android:gravity="center" />
+            </LinearLayout>
+
+            <!-- ========== 收入分类卡片（统一高度） ========== -->
+            <LinearLayout
+                android:id="@+id/llCategory"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_white_rounded"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="8dp"
+                android:minHeight="56dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:elevation="4dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="收入分类"
+                    android:textSize="15sp"
+                    android:textColor="#495057"
+                    android:fontFamily="sans-serif-medium" />
+
+                <TextView
+                    android:id="@+id/tvCategory"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="请选择"
+                    android:textSize="15sp"
+                    android:textColor="#1C1C1E"
+                    android:fontFamily="sans-serif-medium"
+                    android:layout_marginEnd="8dp" />
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_arrow_down"
+                    android:contentDescription="选择" />
+            </LinearLayout>
+
+            <!-- ========== 入账日期卡片（统一高度） ========== -->
+            <LinearLayout
+                android:id="@+id/llDate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_white_rounded"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="8dp"
+                android:minHeight="56dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:elevation="4dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="入账日期"
+                    android:textSize="15sp"
+                    android:textColor="#495057"
+                    android:fontFamily="sans-serif-medium" />
+
+                <TextView
+                    android:id="@+id/tvDate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=""
+                    android:textSize="15sp"
+                    android:textColor="#1C1C1E"
+                    android:fontFamily="sans-serif-medium"
+                    android:layout_marginEnd="8dp" />
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_calendar"
+                    android:contentDescription="选择日期" />
+            </LinearLayout>
+
+            <!-- ========== 所属月份卡片（统一高度） ========== -->
+            <LinearLayout
+                android:id="@+id/llMonth"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_white_rounded"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="8dp"
+                android:minHeight="56dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:elevation="4dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="所属月份"
+                    android:textSize="15sp"
+                    android:textColor="#495057"
+                    android:fontFamily="sans-serif-medium" />
+
+                <TextView
+                    android:id="@+id/tvMonth"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=""
+                    android:textSize="15sp"
+                    android:textColor="#1C1C1E"
+                    android:fontFamily="sans-serif-medium"
+                    android:layout_marginEnd="8dp" />
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_arrow_down"
+                    android:contentDescription="选择月份" />
+            </LinearLayout>
+
+            <!-- ========== 收入备注卡片（统一高度） ========== -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_white_rounded"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="8dp"
+                android:minHeight="56dp"
+                android:elevation="4dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="收入备注"
+                    android:textSize="15sp"
+                    android:textColor="#495057"
+                    android:fontFamily="sans-serif-medium"
+                    android:layout_marginEnd="16dp" />
+
+                <EditText
+                    android:id="@+id/etRemark"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textAlignment="viewEnd"
+                    android:hint="请输入或选择备注"
+                    android:textColorHint="#ADB5BD"
+                    android:textSize="15sp"
+                    android:textColor="#1C1C1E"
+                    android:fontFamily="sans-serif-medium"
+                    android:inputType="text"
+                    android:maxLines="3"
+                    android:background="@null"
+                    android:backgroundTint="@null" />
+            </LinearLayout>
+
+            <!-- ========== 快捷备注标签容器 ========== -->
+            <com.google.android.flexbox.FlexboxLayout
+                android:id="@+id/llRemarkTags"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:flexWrap="wrap"
+                app:alignItems="center"
+                android:padding="4dp"
+                android:layout_marginBottom="16dp" />
+
+            <!-- ========== 确认按钮（纯绿色） ========== -->
+            <!-- ========== 确认按钮（绿色渐变） ========== -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnConfirm"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:text="确认"
+                android:textSize="17sp"
+                android:textColor="#FFFFFF"
+                android:fontFamily="sans-serif-medium"
+                app:cornerRadius="14dp"
+                android:background="@drawable/bg_income_confirm"
+                app:backgroundTint="@null"
+                android:layout_marginTop="16dp" />
+
+        </LinearLayout>
+    </ScrollView>
+
+</LinearLayout>

@@ -32,4 +32,6 @@
     <!-- ===== 卡片颜色 ===== -->
     <color name="pub_card_border">#F0F0F5</color>
     <color name="pub_card_shadow">#E9ECF2</color>
+
+    <color name="day_text_disabled">#CCCCCC</color>
 </resources>
