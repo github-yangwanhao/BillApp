@@ -3,11 +3,15 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:background="#E8F0FE"
+    android:background="@drawable/pub_month_header_oval"
     android:paddingStart="16dp"
     android:paddingEnd="16dp"
-    android:paddingTop="10dp"
-    android:paddingBottom="10dp"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp"
+    android:layout_marginTop = "16dp"
+    android:layout_marginStart="4dp"
+    android:layout_marginEnd="4dp"
+    android:layout_marginBottom="4dp"
     android:gravity="center_vertical">
 
     <TextView
@@ -15,16 +19,15 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:textSize="16sp"
+        android:textSize="15sp"
         android:textStyle="bold"
-        android:textColor="#1A237E" />
+        android:textColor="#1C1C1E" />
 
     <TextView
         android:id="@+id/tv_total"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="14sp"
-        android:textStyle="bold"
-        android:textColor="#1565C0" />
+        android:textColor="#495057" />
 
 </LinearLayout>

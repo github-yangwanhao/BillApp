@@ -5,6 +5,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
+import cn.yangwanhao.billapp.dto.MonthSummary
 import cn.yangwanhao.billapp.entity.ConsumeBill
 
 @Dao
@@ -34,5 +35,17 @@ interface ConsumeBillDao {
 
     @Query("SELECT COUNT(*) FROM consume_bill WHERE BILL_MONTH = :billMonth")
     suspend fun countByBillMonth(billMonth: Int): Int
+
+    /**
+     * 查询某个月份的支出汇总
+     */
+    @Query("SELECT COALESCE(SUM(AMOUNT), 0) as totalAmount, COUNT(*) as count FROM consume_bill WHERE BILL_MONTH = :billMonth")
+    suspend fun getMonthSummary(billMonth: Int): MonthSummary
+
+    /**
+     * 查询最近 N 个有数据的月份
+     */
+    @Query("SELECT DISTINCT BILL_MONTH FROM consume_bill ORDER BY BILL_MONTH DESC LIMIT :limit")
+    suspend fun getRecentMonths(limit: Int = 12): List<Int>
 
 }

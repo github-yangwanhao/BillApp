@@ -6,6 +6,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import cn.yangwanhao.billapp.database.BillDatabase
+import cn.yangwanhao.billapp.dto.MonthSummary
 import cn.yangwanhao.billapp.entity.ConsumeBill
 import cn.yangwanhao.billapp.repository.ConsumeBillRepository
 import cn.yangwanhao.billapp.repository.DictRepository
@@ -19,7 +20,7 @@ class ConsumeBillViewModel(application: Application) : AndroidViewModel(applicat
     private val database = BillDatabase.getDatabase(application)
     private val consumeBillDao = database.consumeBillDao()
     private val dictDao = database.dictDao()
-    private val consumeBillRepository = ConsumeBillRepository(consumeBillDao)
+    val consumeBillRepository = ConsumeBillRepository(consumeBillDao)
     private val dictRepository = DictRepository(dictDao)
     private val _isLoadingMore = MutableLiveData(false)
 
@@ -37,6 +38,24 @@ class ConsumeBillViewModel(application: Application) : AndroidViewModel(applicat
 
     private val _hasMore = MutableLiveData(true)
     val hasMore: LiveData<Boolean> = _hasMore
+    // 在 ConsumeBillViewModel 中添加
+
+    private val _monthSummary = MutableLiveData<MonthSummary?>(null)
+    val monthSummary: LiveData<MonthSummary?> = _monthSummary
+
+    /**
+     * 加载某个月的汇总数据
+     */
+    fun getMonthSummary(month: Int) {
+        viewModelScope.launch {
+            try {
+                val summary = consumeBillRepository.getMonthSummary(month)
+                _monthSummary.postValue(summary)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
 
     fun loadFirstPage() {
         currentPage = 0

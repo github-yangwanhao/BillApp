@@ -1,13 +1,16 @@
 package cn.yangwanhao.billapp.ui.adapter
 
 import android.annotation.SuppressLint
+import android.graphics.drawable.GradientDrawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import cn.yangwanhao.billapp.R
+import cn.yangwanhao.billapp.utils.CategoryIconHelper
 
 class BillListAdapter(
     private val onItemClick: (BillItem) -> Unit,
@@ -65,9 +68,24 @@ class BillListAdapter(
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (val item = items[position]) {
-            is MonthHeader -> (holder as MonthHeaderViewHolder).bind(item)
-            is BillItem -> (holder as BillItemViewHolder).bind(item, onItemClick, onItemLongClick)
-            is LoadingPlaceholder -> (holder as LoadingViewHolder).bind(item)
+            is MonthHeader -> {
+                (holder as MonthHeaderViewHolder).bind(item)
+            }
+            is BillItem -> {
+                val billHolder = holder as BillItemViewHolder
+                billHolder.bind(item, onItemClick, onItemLongClick)
+
+                // 🔥 判断月份边界，控制卡片圆角
+                val isFirstInMonth = position == 0 || items[position - 1] is MonthHeader
+                val isLastInMonth = position == items.size - 1 ||
+                        items[position + 1] is MonthHeader ||
+                        items[position + 1] is LoadingPlaceholder
+
+                billHolder.setCardStyle(isFirstInMonth, isLastInMonth)
+            }
+            is LoadingPlaceholder -> {
+                (holder as LoadingViewHolder).bind(item)
+            }
         }
     }
 
@@ -80,9 +98,6 @@ class BillListAdapter(
         val monthTotal: Int
     )
 
-    /**
-     * 🔥 增加 isFirstInDay 字段
-     */
     data class BillItem(
         val id: Long,
         val categoryName: String,
@@ -92,13 +107,12 @@ class BillListAdapter(
         val remark: String = "",
         val payDate: Int,
         val billMonth: Int,
-        var isFirstInDay: Boolean = false  // 是否是该日期下的第一条
+        var isFirstInDay: Boolean = false
     )
 
     data class LoadingPlaceholder(val isLoading: Boolean)
 
-    // ========== ViewHolder ==========
-
+    // ========== MonthHeader ViewHolder ==========
     class MonthHeaderViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val tvDate: TextView = itemView.findViewById(R.id.tv_date)
         private val tvTotal: TextView = itemView.findViewById(R.id.tv_total)
@@ -109,18 +123,19 @@ class BillListAdapter(
             val month = header.monthInt % 100
             tvDate.text = String.format("%04d年%02d月", year, month)
             val yuan = header.monthTotal / 100.0
-            tvTotal.text = "合计：¥${String.format("%.2f", yuan)}"
+            tvTotal.text = "合计 ¥${String.format("%.2f", yuan)}"
         }
     }
 
+    // ========== BillItem ViewHolder ==========
     class BillItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val vTimelineDot: View = itemView.findViewById(R.id.vTimelineDot)
-        private val vTimelineLine: View = itemView.findViewById(R.id.vTimelineLine)
-        private val tvPayDate: TextView = itemView.findViewById(R.id.tv_pay_date)
-        private val tvCategory: TextView = itemView.findViewById(R.id.tv_category)
-        private val tvChannel: TextView = itemView.findViewById(R.id.tv_channel)
-        private val tvAmount: TextView = itemView.findViewById(R.id.tv_amount)
-        private val tvRemark: TextView = itemView.findViewById(R.id.tv_remark)
+        private val txIcon: ImageView = itemView.findViewById(R.id.txIcon)
+        private val tvCategory: TextView = itemView.findViewById(R.id.tvCategory)
+        private val tvChannel: TextView = itemView.findViewById(R.id.tvChannel)
+        private val tvDate: TextView = itemView.findViewById(R.id.tvDate)
+        private val tvRemark: TextView = itemView.findViewById(R.id.tvRemark)
+        private val tvAmount: TextView = itemView.findViewById(R.id.tvAmount)
+        private val divider: View = itemView.findViewById(R.id.divider)
 
         @SuppressLint("DefaultLocale", "SetTextI18n")
         fun bind(
@@ -128,36 +143,31 @@ class BillListAdapter(
             onItemClick: (BillItem) -> Unit,
             onItemLongClick: (BillItem) -> Unit
         ) {
-            // 时间轴：圆点仅在当天第一条显示
-            vTimelineDot.visibility = if (bill.isFirstInDay) View.VISIBLE else View.INVISIBLE
-            // 竖线始终显示（最后一条可以保留，也可以根据需求隐藏）
-            vTimelineLine.visibility = View.VISIBLE
+            // 分类图标
+            val iconData = CategoryIconHelper.getBillListIcon(bill.categoryName)
+            txIcon.setImageResource(iconData.first)
+            val bg = txIcon.background as? GradientDrawable
+            bg?.setColor(iconData.second)
 
-            // 日期：每条账单都显示
-            if (bill.payDate > 0) {
-                tvPayDate.visibility = View.VISIBLE
-                val month = (bill.payDate % 10000) / 100
-                val day = bill.payDate % 100
-                tvPayDate.text = String.format("%02d-%02d", month, day)
-            } else {
-                tvPayDate.visibility = View.GONE
-            }
-
-            // 分类（纯文字）
+            // 分类名
             tvCategory.text = bill.categoryName
 
-            // 支付渠道（纯文字）
+            // 支付方式标签
             tvChannel.text = bill.channelName
-
-            // 金额
-            val yuan = bill.amount / 100.0
-            val amountStr = String.format("%.2f", yuan)
-            if (bill.isIncome) {
-                tvAmount.text = "¥$amountStr"
-                tvAmount.setTextColor(0xFF388E3C.toInt())
+            tvChannel.visibility = if (bill.channelName.isNullOrEmpty() || bill.channelName == "—") {
+                View.GONE
             } else {
-                tvAmount.text = "¥$amountStr"
-                tvAmount.setTextColor(0xFFD32F2F.toInt())
+                View.VISIBLE
+            }
+
+            // 日期
+            if (bill.payDate > 0) {
+                tvDate.visibility = View.VISIBLE
+                val month = (bill.payDate % 10000) / 100
+                val day = bill.payDate % 100
+                tvDate.text = String.format("%02d-%02d", month, day)
+            } else {
+                tvDate.visibility = View.GONE
             }
 
             // 备注
@@ -168,6 +178,17 @@ class BillListAdapter(
                 tvRemark.text = bill.remark
             }
 
+            // 金额
+            val yuan = bill.amount / 100.0
+            val amountStr = String.format("%.2f", yuan)
+            if (bill.isIncome) {
+                tvAmount.text = "+¥$amountStr"
+                tvAmount.setTextColor(0xFF51CF66.toInt())
+            } else {
+                tvAmount.text = "-¥$amountStr"
+                tvAmount.setTextColor(0xFFFA5252.toInt())
+            }
+
             // 点击事件
             itemView.setOnClickListener { onItemClick(bill) }
             itemView.setOnLongClickListener {
@@ -175,8 +196,40 @@ class BillListAdapter(
                 true
             }
         }
+
+        /**
+         * 设置卡片样式（控制圆角和分割线）
+         * @param isFirstInMonth 是否是当月的第一条账单
+         * @param isLastInMonth 是否是当月的最后一条账单
+         */
+        fun setCardStyle(isFirstInMonth: Boolean, isLastInMonth: Boolean) {
+            // 🔥 控制分割线：不是最后一条才显示
+            divider.visibility = if (isLastInMonth) View.GONE else View.VISIBLE
+
+            // 🔥 控制卡片背景圆角
+            val bgRes = when {
+                isFirstInMonth && isLastInMonth -> {
+                    // 只有一条账单：全圆角
+                    R.drawable.pub_bill_card_single
+                }
+                isFirstInMonth -> {
+                    // 第一条：顶部圆角，底部无
+                    R.drawable.pub_bill_card_top
+                }
+                isLastInMonth -> {
+                    // 最后一条：底部圆角，顶部无
+                    R.drawable.pub_bill_card_bottom
+                }
+                else -> {
+                    // 中间：无圆角
+                    R.drawable.pub_bill_card_middle
+                }
+            }
+            itemView.setBackgroundResource(bgRes)
+        }
     }
 
+    // ========== Loading ViewHolder ==========
     class LoadingViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val progressBar: ProgressBar = itemView.findViewById(R.id.progressBar)
         private val tvText: TextView = itemView.findViewById(R.id.tv_loading_text)

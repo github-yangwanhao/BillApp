@@ -1,6 +1,7 @@
 package cn.yangwanhao.billapp.repository
 
 import cn.yangwanhao.billapp.dao.ConsumeBillDao
+import cn.yangwanhao.billapp.dto.MonthSummary
 import cn.yangwanhao.billapp.entity.ConsumeBill
 
 class ConsumeBillRepository(
@@ -40,5 +41,19 @@ class ConsumeBillRepository(
      */
     suspend fun countByBillMonth(billMonth: Int): Int {
         return consumeBillDao.countByBillMonth(billMonth)
+    }
+
+    /**
+     * 查询某个月份的支出汇总（金额 + 笔数）
+     */
+    suspend fun getMonthSummary(billMonth: Int): MonthSummary {
+        return consumeBillDao.getMonthSummary(billMonth)
+    }
+
+    /**
+     * 查询最近 N 个有数据的月份
+     */
+    suspend fun getRecentMonths(limit: Int = 12): List<Int> {
+        return consumeBillDao.getRecentMonths(limit)
     }
 }

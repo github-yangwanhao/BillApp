@@ -7,11 +7,16 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.widget.ViewPager2
 import cn.yangwanhao.billapp.MainActivity
+import cn.yangwanhao.billapp.R
 import cn.yangwanhao.billapp.databinding.FragmentHomeBinding
 import cn.yangwanhao.billapp.ui.home.add.AddExpenseDialogFragment
-import com.google.android.material.tabs.TabLayoutMediator
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.util.Calendar
 
 class HomeFragment : Fragment() {
 
@@ -20,6 +25,12 @@ class HomeFragment : Fragment() {
 
     val consumeViewModel: ConsumeBillViewModel by viewModels()
     val incomeViewModel: IncomeBillViewModel by viewModels()
+
+    private val currentMonth: Int
+        get() {
+            val calendar = Calendar.getInstance()
+            return calendar.get(Calendar.YEAR) * 100 + (calendar.get(Calendar.MONTH) + 1)
+        }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -31,62 +42,185 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // 注册到 Activity
         (activity as? MainActivity)?.homeFragment = this
 
-        // 🔥 ViewPager2 适配器：3 个页面（首页/统计/我的）
-        val adapter = HomeViewPagerAdapter(this)
-        binding.viewPager.adapter = adapter
+        setupViewPager()
+        setupTabToggle()
+        setupObservers()
+        setupFab()
+        loadStats()
+    }
 
-        // 🔥 TabLayout 只用于支出/收入 Tab（如果只需两个 Tab，保留）
-        // 如果底部导航已经有三 Tab，这里可能不需要 TabLayout，或者只显示支出/收入
-        // 如果 TabLayout 不需要，可以隐藏
-        // 这里根据你的实际需求决定
-        TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
-            tab.text = when (position) {
-                0 -> "支出"
-                1 -> "收入"
-                else -> ""  // 统计和我的页面不显示 Tab
-            }
-        }.attach()
-        // 只在第 0、1 页显示 TabLayout，第 2 页隐藏
-        binding.viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+    // ============================================================
+    // ViewPager2 设置
+    // ============================================================
+    private fun setupViewPager() {
+        val adapter = HomeViewPagerAdapter(this)
+        binding.homeViewPager.adapter = adapter
+
+        binding.homeViewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
-                binding.tabLayout.visibility = if (position <= 1) View.VISIBLE else View.GONE
+                super.onPageSelected(position)
+                updateTabSelection(position)
             }
         })
+    }
 
-        // 加载数据（仅在首页时加载）
+    // ============================================================
+    // Tab 切换逻辑（按钮只负责切换 ViewPager）
+    // ============================================================
+    /*private fun setupTabToggle() {
+        // 点击支出按钮 → 切换到第 0 页
+        binding.homeTabExpense.setOnClickListener {
+            binding.homeViewPager.currentItem = 0
+        }
+
+        // 点击收入按钮 → 切换到第 1 页
+        binding.homeTabIncome.setOnClickListener {
+            binding.homeViewPager.currentItem = 1
+        }
+    }
+
+    *//**
+     * 更新 Tab 样式和选中状态
+     * @param position 0=支出, 1=收入
+     *//*
+    private fun updateTabSelection(position: Int) {
+        val isExpense = position == 0
+
+        // 🔥 同步 ToggleGroup 的选中状态（让按钮高亮）
+        if (isExpense) {
+            binding.homeTabToggle.check(R.id.homeTabExpense)
+        } else {
+            binding.homeTabToggle.check(R.id.homeTabIncome)
+        }
+
+        // 🔥 更新样式（背景色 + 文字颜色）
+        binding.homeTabExpense.apply {
+            backgroundTintList = if (isExpense) {
+                android.content.res.ColorStateList.valueOf(android.graphics.Color.WHITE)
+            } else {
+                android.content.res.ColorStateList.valueOf(android.graphics.Color.TRANSPARENT)
+            }
+            setTextColor(if (isExpense) android.graphics.Color.parseColor("#6366F1") else android.graphics.Color.parseColor("#868E96"))
+        }
+
+        binding.homeTabIncome.apply {
+            backgroundTintList = if (!isExpense) {
+                android.content.res.ColorStateList.valueOf(android.graphics.Color.WHITE)
+            } else {
+                android.content.res.ColorStateList.valueOf(android.graphics.Color.TRANSPARENT)
+            }
+            setTextColor(if (!isExpense) android.graphics.Color.parseColor("#6366F1") else android.graphics.Color.parseColor("#868E96"))
+        }
+    }*/
+    // ============================================================
+// Tab 切换逻辑（完全手动控制，不依赖 ToggleGroup）
+// ============================================================
+    private fun setupTabToggle() {
+        // 默认选中支出
+        updateTabSelection(0)
+
+        // 点击支出按钮 → 切换到支出
+        binding.homeTabExpense.setOnClickListener {
+            binding.homeViewPager.currentItem = 0
+        }
+
+        // 点击收入按钮 → 切换到收入
+        binding.homeTabIncome.setOnClickListener {
+            binding.homeViewPager.currentItem = 1
+        }
+    }
+
+    /**
+     * 更新 Tab 样式（完全手动控制）
+     * @param position 0=支出, 1=收入
+     */
+    private fun updateTabSelection(position: Int) {
+        val isExpense = position == 0
+
+        // 支出按钮
+        binding.homeTabExpense.apply {
+            // 设置背景色（直接使用 ColorStateList）
+            backgroundTintList = android.content.res.ColorStateList.valueOf(
+                if (isExpense) android.graphics.Color.WHITE else android.graphics.Color.TRANSPARENT
+            )
+            setTextColor(
+                if (isExpense) android.graphics.Color.parseColor("#6366F1")
+                else android.graphics.Color.parseColor("#868E96")
+            )
+        }
+
+        // 收入按钮
+        binding.homeTabIncome.apply {
+            backgroundTintList = android.content.res.ColorStateList.valueOf(
+                if (!isExpense) android.graphics.Color.WHITE else android.graphics.Color.TRANSPARENT
+            )
+            setTextColor(
+                if (!isExpense) android.graphics.Color.parseColor("#6366F1")
+                else android.graphics.Color.parseColor("#868E96")
+            )
+        }
+    }
+    // ============================================================
+    // 数据观察 & 统计加载
+    // ============================================================
+    private fun setupObservers() {
+        consumeViewModel.adapterItems.observe(viewLifecycleOwner) {
+            loadStats()
+        }
+
+        incomeViewModel.adapterItems.observe(viewLifecycleOwner) {
+            // 收入列表更新时，如果当前是收入 Tab，可刷新统计
+        }
+
         consumeViewModel.loadFirstPage()
         incomeViewModel.loadFirstPage()
+    }
 
-        // FAB 点击事件（仅在首页时显示）
-        binding.fabAddBill.setOnClickListener {
+    private fun loadStats() {
+        lifecycleScope.launch {
+            try {
+                val summary = withContext(Dispatchers.IO) {
+                    consumeViewModel.consumeBillRepository.getMonthSummary(currentMonth)
+                }
+                withContext(Dispatchers.Main) {
+                    val yuan = summary.totalAmount / 100.0
+                    binding.homeStatsAmount.text = "¥${String.format("%.2f", yuan)}"
+                    binding.homeStatsBadge.text = "共 ${summary.count} 笔"
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    // ============================================================
+    // FAB 按钮
+    // ============================================================
+    private fun setupFab() {
+        binding.homeFabAdd.setOnClickListener {
             val dialog = AddExpenseDialogFragment()
             dialog.setOnSaveSuccessListener {
-                when (binding.tabLayout.selectedTabPosition) {
-                    0 -> consumeViewModel.refresh()
+                when (binding.homeViewPager.currentItem) {
+                    0 -> {
+                        consumeViewModel.refresh()
+                        loadStats()
+                    }
                     1 -> incomeViewModel.refresh()
                 }
                 Toast.makeText(requireContext(), "账单已更新", Toast.LENGTH_SHORT).show()
             }
             dialog.show(childFragmentManager, "AddExpenseDialog")
         }
-
-        // 切换页面时控制 FAB 显隐
-        binding.viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
-            override fun onPageSelected(position: Int) {
-                // 第 0 页（首页）显示 FAB，其他隐藏
-                binding.fabAddBill.visibility = if (position == 0) View.VISIBLE else View.GONE
-            }
-        })
     }
 
     // ============================================================
-    //  供子 Fragment 调用 - 刷新列表
+    // 供外部调用
     // ============================================================
     fun refreshConsume() {
         consumeViewModel.refresh()
+        loadStats()
     }
 
     fun refreshIncome() {
@@ -103,22 +237,20 @@ class HomeFragment : Fragment() {
 
     fun deleteConsumeBill(billId: Long) {
         consumeViewModel.deleteBill(billId)
+        loadStats()
     }
 
     fun deleteIncomeBill(billId: Long) {
         incomeViewModel.deleteBill(billId)
     }
 
-    /**
-     * 供 Activity 调用，切换 ViewPager2 的 Tab
-     */
     fun setCurrentTab(position: Int) {
-        binding.viewPager.currentItem = position
+        binding.homeViewPager.currentItem = position
+        updateTabSelection(position)
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        // 取消注册
         (activity as? MainActivity)?.homeFragment = null
         _binding = null
     }

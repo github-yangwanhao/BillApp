@@ -11,7 +11,7 @@ import cn.yangwanhao.billapp.ui.home.HomeFragment
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    private lateinit var navController: NavController
+    lateinit var navController: NavController
 
     // 持有 HomeFragment 引用，用于切换 ViewPager2
     var homeFragment: HomeFragment? = null

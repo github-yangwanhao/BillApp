@@ -1,11 +1,12 @@
 <resources>
     <style name="Theme.BillApp" parent="Theme.MaterialComponents.Light.NoActionBar">
-        <item name="colorPrimary">#1976D2</item>
-        <item name="colorPrimaryVariant">#1565C0</item>
+        <item name="colorPrimary">#6366F1</item>
+        <item name="colorPrimaryVariant">#4F46E5</item>
         <item name="colorOnPrimary">#FFFFFF</item>
-        <item name="colorSecondary">#FF6F00</item>
-        <item name="colorSecondaryVariant">#E65100</item>
+        <item name="colorSecondary">#6366F1</item>
+        <item name="colorSecondaryVariant">#4F46E5</item>
         <item name="colorOnSecondary">#FFFFFF</item>
+        <item name="colorAccent">#6366F1</item>
     </style>
     <style name="MyTabText" parent="TextAppearance.Design.Tab">
         <item name="android:textSize">22sp</item>
@@ -35,5 +36,9 @@
         <item name="android:textColor">#999999</item>
         <item name="android:textStyle">bold</item>
         <item name="android:paddingVertical">4dp</item>
+    </style>
+
+    <style name="MyBottomNavText">
+        <item name="android:textSize">12sp</item>
     </style>
 </resources>
