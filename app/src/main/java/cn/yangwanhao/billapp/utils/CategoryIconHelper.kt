@@ -38,4 +38,26 @@ object CategoryIconHelper {
                 Pair(R.drawable.ic_bill_list_category_other, 0xFF868E96.toInt())  // 其他/自定义
         }
     }
+
+    /**
+     * 获取收入分类的图标和颜色
+     * @return Pair(图标资源ID, 颜色值)
+     */
+    fun getIncomeIcon(categoryName: String): Pair<Int, Int> {
+        return when {
+            categoryName.contains("工资") || categoryName.contains("薪资") ->
+                Pair(R.drawable.ic_income_salary, 0xFF2B8A3E.toInt())
+            categoryName.contains("奖金") || categoryName.contains("提成") ->
+                Pair(R.drawable.ic_income_bonus, 0xFFFCC419.toInt())
+            categoryName.contains("红包") || categoryName.contains("礼金") ->
+                Pair(R.drawable.ic_income_gift, 0xFFFA5252.toInt())
+            categoryName.contains("理财") || categoryName.contains("投资") ||
+                    categoryName.contains("基金") ->
+                Pair(R.drawable.ic_income_finance, 0xFF4DABF7.toInt())
+            categoryName.contains("兼职") || categoryName.contains("副业") ->
+                Pair(R.drawable.ic_income_parttime, 0xFF20C997.toInt())
+            else ->
+                Pair(R.drawable.ic_income_other, 0xFF868E96.toInt())
+        }
+    }
 }

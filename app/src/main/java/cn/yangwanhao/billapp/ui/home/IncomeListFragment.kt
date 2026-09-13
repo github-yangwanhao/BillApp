@@ -7,18 +7,21 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import cn.yangwanhao.billapp.R
 import cn.yangwanhao.billapp.common.DateUtil
-import cn.yangwanhao.billapp.databinding.FragmentBillListBinding
-import cn.yangwanhao.billapp.ui.adapter.BillListAdapter
+import cn.yangwanhao.billapp.databinding.FragmentIncomeListBinding
+import cn.yangwanhao.billapp.ui.adapter.IncomeListAdapter
+import kotlinx.coroutines.launch
 
 class IncomeListFragment : Fragment() {
 
-    private var _binding: FragmentBillListBinding? = null
+    private var _binding: FragmentIncomeListBinding? = null
     private val binding get() = _binding!!
 
-    private lateinit var adapter: BillListAdapter
+    private lateinit var adapter: IncomeListAdapter
 
     companion object {
         fun newInstance(): IncomeListFragment {
@@ -29,7 +32,7 @@ class IncomeListFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentBillListBinding.inflate(inflater, container, false)
+        _binding = FragmentIncomeListBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -37,38 +40,36 @@ class IncomeListFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val layoutManager = LinearLayoutManager(context)
-        binding.recyclerView.layoutManager = layoutManager
+        binding.rvIncomeList.layoutManager = layoutManager
 
-        adapter = BillListAdapter(
-            onItemClick = { bill -> showBillDetail(bill) },
-            onItemLongClick = { bill -> showDeleteConfirm(bill) }
+        adapter = IncomeListAdapter(
+            onItemClick = { item -> showIncomeDetail(item) },
+            onItemLongClick = { item -> showDeleteConfirm(item) }
         )
-        binding.recyclerView.adapter = adapter
+        binding.rvIncomeList.adapter = adapter
 
-        // 🔥 初始显示空状态（避免数据加载前空白）
-        showEmptyState(true)
-
+        // 监听数据变化
         (parentFragment as? HomeFragment)?.let { homeFragment ->
             homeFragment.incomeViewModel.adapterItems.observe(viewLifecycleOwner) { items ->
-                // 🔥 安全处理：如果 items 为 null，当作空列表
                 val safeItems = items ?: emptyList()
-
-                // 🔥 打印日志，方便调试
-                android.util.Log.d("IncomeList", "收到数据，条数: ${safeItems.size}")
-
                 adapter.submitList(safeItems)
-                binding.swipeRefreshLayout.isRefreshing = false
+            }
 
-                // 🔥 控制空状态显示
-                showEmptyState(safeItems.isEmpty())
+            // 监听统计信息
+            homeFragment.incomeViewModel.monthlyTotal.observe(viewLifecycleOwner) { total ->
+                updateStats()
+            }
+            homeFragment.incomeViewModel.monthlyCount.observe(viewLifecycleOwner) { count ->
+                updateStats()
+            }
+            homeFragment.incomeViewModel.crossMonthCount.observe(viewLifecycleOwner) { count ->
+                updateStats()
             }
         }
 
-        binding.swipeRefreshLayout.setOnRefreshListener {
-            (parentFragment as? HomeFragment)?.refreshIncome()
-        }
-
-        binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+        // 滚动加载更多
+        // 滚动加载更多
+        binding.rvIncomeList.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
                 if (dy > 0) {
@@ -82,41 +83,49 @@ class IncomeListFragment : Fragment() {
         })
     }
 
-    // 🔥 提取为独立方法，方便调用
-    private fun showEmptyState(isEmpty: Boolean) {
-        if (isEmpty) {
-            binding.emptyView.visibility = View.VISIBLE
-            binding.recyclerView.visibility = View.GONE
-            android.util.Log.d("IncomeList", "显示空状态")
+    /**
+     * 更新统计卡片
+     */
+    @SuppressLint("SetTextI18n")
+    private fun updateStats() {
+        val homeFragment = parentFragment as? HomeFragment ?: return
+        val total = homeFragment.incomeViewModel.monthlyTotal.value ?: 0
+        val count = homeFragment.incomeViewModel.monthlyCount.value ?: 0
+        val crossCount = homeFragment.incomeViewModel.crossMonthCount.value ?: 0
+
+        val yuan = total / 100.0
+        binding.tvStatsAmount.text = "¥${String.format("%.2f", yuan)}"
+        binding.tvStatsBadge.text = "+¥${String.format("%.0f", yuan)}"
+
+        val subText = if (crossCount > 0) {
+            "共 $count 笔 · 含 $crossCount 笔跨月归属"
         } else {
-            binding.emptyView.visibility = View.GONE
-            binding.recyclerView.visibility = View.VISIBLE
-            android.util.Log.d("IncomeList", "隐藏空状态")
+            "共 $count 笔"
         }
+        binding.tvStatsSub.text = subText
     }
 
     // ============================================================
     //  点击查看详情
     // ============================================================
     @SuppressLint("DefaultLocale")
-    private fun showBillDetail(bill: BillListAdapter.BillItem) {
-        val dateStr = DateUtil.dateIntToDisplay(bill.payDate)
-        val amountYuan = bill.amount / 100.0
+    private fun showIncomeDetail(item: IncomeListAdapter.IncomeListItem.IncomeItem) {
+        val dateStr = DateUtil.dateIntToDisplay(item.postDate)
+        val belongMonthStr = DateUtil.monthIntToDisplay(item.billMonth)
+        val amountYuan = item.amount / 100.0
         val amountStr = String.format("%.2f", amountYuan)
-        val sign = if (bill.isIncome) "+" else "-"
-        val channel = if (bill.isIncome) "—" else bill.channelName
-        val remark = bill.remark.ifEmpty { "无" }
+        val remark = item.remark.ifEmpty { "无" }
 
         val message = """
-            日期：$dateStr
-            分类：${bill.categoryName}
-            渠道：$channel
-            金额：$sign¥$amountStr
+            入账日期：$dateStr
+            所属月份：$belongMonthStr
+            分类：${item.categoryName}
+            金额：+¥$amountStr
             备注：$remark
         """.trimIndent()
 
         AlertDialog.Builder(requireContext())
-            .setTitle("账单详情")
+            .setTitle("收入详情")
             .setMessage(message)
             .setPositiveButton("确定", null)
             .show()
@@ -126,28 +135,26 @@ class IncomeListFragment : Fragment() {
     //  长按删除
     // ============================================================
     @SuppressLint("DefaultLocale")
-    private fun showDeleteConfirm(bill: BillListAdapter.BillItem) {
-        val dateStr = DateUtil.dateIntToDisplay(bill.payDate)
-        val amountYuan = bill.amount / 100.0
+    private fun showDeleteConfirm(item: IncomeListAdapter.IncomeListItem.IncomeItem) {
+        val dateStr = DateUtil.dateIntToDisplay(item.postDate)
+        val amountYuan = item.amount / 100.0
         val amountStr = String.format("%.2f", amountYuan)
-        val sign = if (bill.isIncome) "+" else "-"
-        val remark = bill.remark.ifEmpty { "无" }
+        val remark = item.remark.ifEmpty { "无" }
 
         val message = """
-        日期：$dateStr
-        分类：${bill.categoryName}
-        渠道：${bill.channelName}
-        金额：$sign¥$amountStr
-        备注：$remark
-        
-        确定要删除这笔账单吗？
+            入账日期：$dateStr
+            分类：${item.categoryName}
+            金额：+¥$amountStr
+            备注：$remark
+            
+            确定要删除这笔收入吗？
         """.trimIndent()
 
         AlertDialog.Builder(requireContext())
             .setTitle("⚠️ 删除确认")
             .setMessage(message)
             .setPositiveButton("删除") { _, _ ->
-                (parentFragment as? HomeFragment)?.deleteIncomeBill(bill.id)
+                (parentFragment as? HomeFragment)?.deleteIncomeBill(item.id)
             }
             .setNegativeButton("取消", null)
             .show()

@@ -19,4 +19,13 @@ class IncomeBillRepository(
     suspend fun addBill(bill: IncomeBill): Long {
         return incomeBillDao.insert(bill)
     }
+
+    // 新增方法
+    suspend fun getMonthTotal(billMonth: Int): Int {
+        return incomeBillDao.getMonthTotal(billMonth)
+    }
+
+    suspend fun countByBillMonth(billMonth: Int): Int {
+        return incomeBillDao.countByBillMonth(billMonth)
+    }
 }

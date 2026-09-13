@@ -167,14 +167,32 @@ class IncomeAddDialogFragment : DialogFragment() {
                 isFocusable = true
 
                 setOnClickListener {
-                    isSelected = !isSelected
+                    // 🔥 1. 如果当前标签已经是选中状态，则取消选中并清空输入框
                     if (isSelected) {
-                        setBackgroundResource(R.drawable.bg_tag_selected)
-                        setTextColor(Color.WHITE)
-                    } else {
+                        isSelected = false
                         setBackgroundResource(R.drawable.bg_tag_unselected)
                         setTextColor(Color.parseColor("#495057"))
+                        binding.etRemark.setText("")
+                        return@setOnClickListener
                     }
+
+                    // 🔥 2. 取消所有标签的选中状态
+                    for (i in 0 until binding.llRemarkTags.childCount) {
+                        val child = binding.llRemarkTags.getChildAt(i)
+                        if (child is TextView) {
+                            child.isSelected = false
+                            child.setBackgroundResource(R.drawable.bg_tag_unselected)
+                            child.setTextColor(Color.parseColor("#495057"))
+                        }
+                    }
+
+                    // 🔥 3. 选中当前标签
+                    isSelected = true
+                    setBackgroundResource(R.drawable.bg_tag_selected)
+                    setTextColor(Color.WHITE)
+
+                    // 🔥 4. 将标签文本填入备注输入框
+                    binding.etRemark.setText(text)
                 }
             }
 

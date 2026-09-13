@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F8F9FC">
+
+    <!-- ========== 统计卡片 ========== -->
+    <LinearLayout
+        android:id="@+id/statsCard"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="@drawable/bg_white_rounded"
+        android:padding="16dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="4dp"
+        android:layout_marginBottom="8dp"
+        android:minHeight="80dp"
+        android:gravity="center_vertical">
+
+        <!-- 左：标题 + 金额 + 描述 -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvStatsLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="本月总收入"
+                android:textSize="13sp"
+                android:textColor="#868E96" />
+
+            <TextView
+                android:id="@+id/tvStatsAmount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="¥0.00"
+                android:textSize="28sp"
+                android:textStyle="bold"
+                android:textColor="#2B8A3E"
+                android:fontFamily="sans-serif-medium" />
+
+            <TextView
+                android:id="@+id/tvStatsSub"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="共 0 笔"
+                android:textSize="12sp"
+                android:textColor="#ADB5BD"
+                android:layout_marginTop="2dp" />
+        </LinearLayout>
+
+        <!-- 右：徽章 -->
+        <TextView
+            android:id="@+id/tvStatsBadge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_stats_badge_income"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp"
+            android:paddingTop="6dp"
+            android:paddingBottom="6dp"
+            android:text="+¥0"
+            android:textSize="13sp"
+            android:textColor="#2B8A3E"
+            android:fontWeight="500" />
+    </LinearLayout>
+
+    <!-- ========== 收入列表 ========== -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvIncomeList"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:paddingBottom="80dp" />
+
+</LinearLayout>

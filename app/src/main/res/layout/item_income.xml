@@ -2,117 +2,116 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/pub_bill_card_middle"
-    android:orientation="horizontal">
+    android:orientation="vertical"
+    android:background="@drawable/pub_bill_card_middle">
 
-    <!-- 账单内容行 -->
+    <!-- ===== 账单内容行 ===== -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:paddingStart="12dp"
-        android:paddingTop="14dp"
         android:paddingEnd="12dp"
+        android:paddingTop="14dp"
         android:paddingBottom="14dp">
 
-        <!-- 分类图标 -->
+        <!-- 分类图标（48dp，与支出同款） -->
         <ImageView
-            android:id="@+id/txIcon"
+            android:id="@+id/ivIncomeIcon"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:layout_marginEnd="16dp"
-            android:background="@drawable/pub_icon_bg"
             android:padding="10dp"
-            android:scaleType="center" />
+            android:scaleType="center"
+            android:background="@drawable/pub_icon_bg"
+            android:layout_marginEnd="16dp" />
 
-        <!-- 内容区 -->
+        <!-- 中间内容区 -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:gravity="center_vertical"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:gravity="center_vertical">
 
-            <!-- 第一行：分类名 + 支付标签 -->
+            <!-- 第一行：分类名 + 所属月份标签 -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
 
                 <TextView
-                    android:id="@+id/tvCategory"
+                    android:id="@+id/tvIncomeCategory"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:maxLines="1"
-                    android:textColor="#1C1C1E"
                     android:textSize="17sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:textColor="#1C1C1E"
+                    android:maxLines="1" />
 
+                <!-- 所属月份标签（跨月时显示，位置对应支出的支付方式） -->
                 <TextView
-                    android:id="@+id/tvChannel"
+                    android:id="@+id/tvIncomeBelongMonth"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
-                    android:background="@drawable/pub_channel_tag"
-                    android:maxLines="1"
+                    android:textSize="12sp"
+                    android:textColor="#2B8A3E"
+                    android:background="@drawable/bg_belong_tag"
                     android:paddingStart="12dp"
-                    android:paddingTop="3dp"
                     android:paddingEnd="12dp"
+                    android:paddingTop="3dp"
                     android:paddingBottom="3dp"
-                    android:textColor="#495057"
-                    android:textSize="12sp" />
+                    android:maxLines="1"
+                    android:visibility="gone" />
             </LinearLayout>
 
-            <!-- 第二行：日期 + 备注 -->
+            <!-- 第二行：入账日期 + 备注 -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:orientation="horizontal"
                 android:layout_marginTop="4dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:gravity="center_vertical">
 
                 <TextView
-                    android:id="@+id/tvDate"
+                    android:id="@+id/tvIncomeDate"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="#ADB5BD"
-                    android:textSize="13sp" />
+                    android:textSize="13sp"
+                    android:textColor="#ADB5BD" />
 
                 <TextView
-                    android:id="@+id/tvRemark"
+                    android:id="@+id/tvIncomeRemark"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
                     android:layout_weight="1"
-                    android:ellipsize="end"
-                    android:maxLines="1"
+                    android:layout_marginStart="8dp"
+                    android:textSize="13sp"
                     android:textColor="#868E96"
-                    android:textSize="13sp" />
-
+                    android:maxLines="1"
+                    android:ellipsize="end" />
             </LinearLayout>
-
         </LinearLayout>
 
         <!-- 金额 -->
         <TextView
-            android:id="@+id/tvAmount"
+            android:id="@+id/tvIncomeAmount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:textColor="#FA5252"
             android:textSize="18sp"
-            android:textStyle="bold" />
-
+            android:textStyle="bold"
+            android:textColor="#2B8A3E" />
     </LinearLayout>
 
-    <!-- 🔥 分割线：左右两侧与卡片边框保持距离（用 padding 或 margin） -->
+    <!-- 分割线 -->
     <View
-        android:id="@+id/divider"
+        android:id="@+id/incomeDivider"
         android:layout_width="match_parent"
         android:layout_height="0.5dp"
+        android:background="#F0F0F5"
         android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:background="#F0F0F5" />
+        android:layout_marginEnd="16dp" />
 
 </LinearLayout>

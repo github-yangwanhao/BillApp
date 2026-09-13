@@ -63,6 +63,7 @@ class HomeFragment : Fragment() {
         binding.homeViewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
+                currentTab = position
                 updateTabSelection(position)
                 updateFabStyle(position)
             }
@@ -214,17 +215,17 @@ class HomeFragment : Fragment() {
             fab.backgroundTintList = android.content.res.ColorStateList.valueOf(
                 android.graphics.Color.parseColor("#D32F2F")
             )
-            fab.setOnClickListener {
-                showExpenseDialog()
-            }
+            fab.setOnClickListener { showExpenseDialog() }
+            binding.homeStatsCard.visibility = View.VISIBLE
+            fab.visibility = View.VISIBLE
         } else {
             // 收入：绿色
             fab.backgroundTintList = android.content.res.ColorStateList.valueOf(
                 android.graphics.Color.parseColor("#2B8A3E")
             )
-            fab.setOnClickListener {
-                showIncomeDialog()
-            }
+            fab.setOnClickListener { showIncomeDialog() }
+            binding.homeStatsCard.visibility = View.GONE
+            fab.visibility = View.VISIBLE
         }
     }
 

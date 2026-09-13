@@ -16,4 +16,11 @@ interface IncomeBillDao {
 
     @Insert
     suspend fun insert(bill: IncomeBill): Long
+
+    // 新增方法
+    @Query("SELECT COALESCE(SUM(AMOUNT), 0) FROM income_bill WHERE BILL_MONTH = :billMonth")
+    suspend fun getMonthTotal(billMonth: Int): Int
+
+    @Query("SELECT COUNT(*) FROM income_bill WHERE BILL_MONTH = :billMonth")
+    suspend fun countByBillMonth(billMonth: Int): Int
 }
