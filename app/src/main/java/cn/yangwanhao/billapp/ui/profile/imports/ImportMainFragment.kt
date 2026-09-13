@@ -39,11 +39,7 @@ class ImportMainFragment : Fragment() {
 
         // 收入导入（暂未开放）
         binding.btnIncomeImport.setOnClickListener {
-            Toast.makeText(
-                requireContext(),
-                "收入导入功能即将开放，敬请期待",
-                Toast.LENGTH_SHORT
-            ).show()
+            findNavController().navigate(R.id.importIncomeFragment)
         }
     }
 

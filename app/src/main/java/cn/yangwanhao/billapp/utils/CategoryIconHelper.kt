@@ -49,6 +49,9 @@ object CategoryIconHelper {
                 Pair(R.drawable.ic_income_salary, 0xFF2B8A3E.toInt())
             categoryName.contains("奖金") || categoryName.contains("提成") ->
                 Pair(R.drawable.ic_income_bonus, 0xFFFCC419.toInt())
+            categoryName.contains("补贴") || categoryName.contains("津贴") ||
+                    categoryName.contains("补助") ->
+                Pair(R.drawable.ic_income_subsidy, 0xFFFF922B.toInt())
             categoryName.contains("红包") || categoryName.contains("礼金") ->
                 Pair(R.drawable.ic_income_gift, 0xFFFA5252.toInt())
             categoryName.contains("理财") || categoryName.contains("投资") ||

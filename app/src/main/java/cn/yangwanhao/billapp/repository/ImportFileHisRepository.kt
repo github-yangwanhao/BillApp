@@ -11,7 +11,7 @@ class ImportFileHisRepository(
         return importFileHisDao.insert(record)
     }
 
-    suspend fun getByMd5(md5: String): ImportFileHis? {
-        return importFileHisDao.getByMd5(md5)
+    suspend fun getByMd5AndType(md5: String, importType: String): ImportFileHis? {
+        return importFileHisDao.getByMd5AndType(md5, importType)
     }
 }

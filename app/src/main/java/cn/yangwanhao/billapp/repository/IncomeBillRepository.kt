@@ -6,26 +6,23 @@ import cn.yangwanhao.billapp.entity.IncomeBill
 class IncomeBillRepository(
     private val incomeBillDao: IncomeBillDao
 ) {
+    suspend fun addBill(bill: IncomeBill): Long = incomeBillDao.insert(bill)
 
-    suspend fun deleteBillById(id: Long) {
-        incomeBillDao.deleteById(id)
-    }
+    suspend fun insertAll(bills: List<IncomeBill>) = incomeBillDao.insertAll(bills)
 
-    suspend fun getBillsPaged(limit: Int, offset: Int): List<IncomeBill> {
-        return incomeBillDao.getBillsPaged(limit, offset)
-    }
+    suspend fun deleteBillById(id: Long) = incomeBillDao.deleteById(id)
 
-    // 新增
-    suspend fun addBill(bill: IncomeBill): Long {
-        return incomeBillDao.insert(bill)
-    }
+    suspend fun deleteByBillMonth(billMonth: Int) = incomeBillDao.deleteByBillMonth(billMonth)
 
-    // 新增方法
-    suspend fun getMonthTotal(billMonth: Int): Int {
-        return incomeBillDao.getMonthTotal(billMonth)
-    }
+    suspend fun getBillsPaged(limit: Int, offset: Int): List<IncomeBill> =
+        incomeBillDao.getBillsPaged(limit, offset)
 
-    suspend fun countByBillMonth(billMonth: Int): Int {
-        return incomeBillDao.countByBillMonth(billMonth)
-    }
+    suspend fun getMonthTotal(billMonth: Int): Int =
+        incomeBillDao.getMonthTotal(billMonth)
+
+    suspend fun countByBillMonth(billMonth: Int): Int =
+        incomeBillDao.countByBillMonth(billMonth)
+
+    suspend fun countCrossMonthByBillMonth(billMonth: Int): Int =
+        incomeBillDao.countCrossMonthByBillMonth(billMonth)
 }

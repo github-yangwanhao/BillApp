@@ -6,28 +6,26 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import cn.yangwanhao.billapp.database.BillDatabase
-import cn.yangwanhao.billapp.repository.ConsumeBillRepository
 import cn.yangwanhao.billapp.repository.DictRepository
 import cn.yangwanhao.billapp.repository.ImportFileHisRepository
-import cn.yangwanhao.billapp.service.ImportResult
-import cn.yangwanhao.billapp.service.ImportService
+import cn.yangwanhao.billapp.repository.IncomeBillRepository
+import cn.yangwanhao.billapp.service.IncomeImportResult
+import cn.yangwanhao.billapp.service.IncomeImportService
 import kotlinx.coroutines.launch
 import java.io.File
 
-class ImportExpenseViewModel(application: Application) : AndroidViewModel(application) {
+class ImportIncomeViewModel(application: Application) : AndroidViewModel(application) {
 
     private val database = BillDatabase.getDatabase(application)
-    private val consumeBillDao = database.consumeBillDao()
-    private val importFileHisDao = database.importFileHisDao()
-    private val importFileHisRepository = ImportFileHisRepository(importFileHisDao)
+    private val importFileHisRepository = ImportFileHisRepository(database.importFileHisDao())
     private val dictRepository = DictRepository(database.dictDao())
-    private val consumeBillRepository = ConsumeBillRepository(consumeBillDao)
+    private val incomeBillRepository = IncomeBillRepository(database.incomeBillDao())
 
-    private val importService = ImportService(
+    private val importService = IncomeImportService(
         database = database,
         importFileHisRepository = importFileHisRepository,
         dictRepository = dictRepository,
-        consumeBillRepository = consumeBillRepository
+        incomeBillRepository = incomeBillRepository
     )
 
     private val _files = MutableLiveData<List<ImportFileItem>>(emptyList())
@@ -50,61 +48,47 @@ class ImportExpenseViewModel(application: Application) : AndroidViewModel(applic
 
     private var isCancelled = false
 
-    /**
-     * 解析文件，添加到列表
-     */
     fun addFiles(files: List<File>) {
-        val validFiles = files.filter { file ->
-            importService.parseBillMonthFromFileName(file.name) != null
+        // 收入导入不再依赖文件名格式，所有 .xlsx / .xls 都接受
+        val validFiles = files.filter {
+            it.name.endsWith(".xlsx", true) || it.name.endsWith(".xls", true)
         }
 
         val newItems = validFiles.map { file ->
             ImportFileItem(
                 fileName = file.name,
                 filePath = file.absolutePath,
-                billMonth = importService.parseBillMonthFromFileName(file.name)!!,
+                billMonth = 0,  // 收入不再从文件名推导月份
                 size = file.length(),
                 status = ImportFileStatus.PENDING
             )
         }
 
-        // 去重（按文件路径）
         val currentPaths = _files.value?.map { it.filePath }?.toSet() ?: emptySet()
         val filtered = newItems.filter { it.filePath !in currentPaths }
-
         if (filtered.isNotEmpty()) {
-            val updated = (_files.value ?: emptyList()) + filtered
-            _files.value = updated
+            _files.value = (_files.value ?: emptyList()) + filtered
         }
 
         if (validFiles.size < files.size) {
-            _toastMessage.value = "已过滤 ${files.size - validFiles.size} 个不符合命名规则的文件"
+            _toastMessage.value = "已过滤 ${files.size - validFiles.size} 个非 Excel 文件"
         }
     }
 
-    /**
-     * 清空文件列表
-     */
     fun clearFiles() {
         _files.value = emptyList()
         _importResult.value = null
     }
 
-    /**
-     * 开始导入
-     */
-    fun startImport(onConflict: suspend(Int, Int) -> Boolean) {
-        // 🔥 防重入：如果已在导入中，直接拒绝
+    fun startImport() {
         if (_isImporting.value == true) {
             return
         }
-
         val fileList = _files.value ?: emptyList()
         if (fileList.isEmpty()) {
             _toastMessage.value = "请先选择文件"
             return
         }
-
         if (fileList.all { it.status != ImportFileStatus.PENDING }) {
             _toastMessage.value = "没有待导入的文件"
             return
@@ -125,48 +109,29 @@ class ImportExpenseViewModel(application: Application) : AndroidViewModel(applic
             val details = mutableListOf<ImportFileDetail>()
 
             pending.forEachIndexed { index, item ->
-                if (isCancelled) {
-                    _toastMessage.value = "导入已取消"
-                    return@forEachIndexed
-                }
+                if (isCancelled) return@forEachIndexed
 
                 _progress.value = ((index.toFloat() / total) * 100).toInt()
                 _progressText.value = "正在导入：${item.fileName}"
 
-                val result = importService.importFile(
-                    file = File(item.filePath),
-                    onConflict = { billMonth, existingCount ->
-                        onConflict(billMonth, existingCount)
-                    }
-                )
+                val result = importService.importFile(File(item.filePath))
 
                 val status = when (result) {
-                    is ImportResult.Success -> {
-                        successCount++
-                        ImportFileStatus.SUCCESS
+                    is IncomeImportResult.Success -> {
+                        successCount++; ImportFileStatus.SUCCESS
                     }
-                    is ImportResult.AlreadyImported -> {
-                        skippedCount++
-                        ImportFileStatus.SKIPPED
+                    is IncomeImportResult.AlreadyImported -> {
+                        skippedCount++; ImportFileStatus.SKIPPED
                     }
-                    is ImportResult.Failed -> {
-                        failedCount++
-                        ImportFileStatus.FAILED
-                    }
-                    is ImportResult.Conflict -> {
-                        failedCount++
-                        ImportFileStatus.FAILED
+                    is IncomeImportResult.Failed -> {
+                        failedCount++; ImportFileStatus.FAILED
                     }
                 }
 
-                val recordCount = when (result) {
-                    is ImportResult.Success -> result.recordCount
-                    else -> 0
-                }
-
+                val recordCount = (result as? IncomeImportResult.Success)?.recordCount ?: 0
                 val errorMessage = when (result) {
-                    is ImportResult.Failed -> result.reason
-                    is ImportResult.AlreadyImported -> "文件已导入过"
+                    is IncomeImportResult.Failed -> result.reason
+                    is IncomeImportResult.AlreadyImported -> "文件已导入过"
                     else -> null
                 }
 
@@ -178,37 +143,23 @@ class ImportExpenseViewModel(application: Application) : AndroidViewModel(applic
                         errorMessage = errorMessage
                     )
                 )
-
                 updateFileStatus(item.filePath, status, recordCount, errorMessage)
             }
 
             _isImporting.value = false
             _progress.value = 100
             _progressText.value = "导入完成"
-
-            _importResult.value = ImportSummary(
-                successCount = successCount,
-                failedCount = failedCount,
-                skippedCount = skippedCount,
-                details = details
-            )
-
+            _importResult.value = ImportSummary(successCount, failedCount, skippedCount, details)
             _toastMessage.value = "导入完成：成功 $successCount，失败 $failedCount，跳过 $skippedCount"
         }
     }
 
-    /**
-     * 取消导入
-     */
     fun cancelImport() {
         isCancelled = true
         _isImporting.value = false
         _progressText.value = "已取消"
     }
 
-    /**
-     * 更新单个文件状态
-     */
     private fun updateFileStatus(filePath: String, status: ImportFileStatus, recordCount: Int, errorMessage: String?) {
         val current = _files.value?.toMutableList() ?: return
         val index = current.indexOfFirst { it.filePath == filePath }
@@ -222,9 +173,6 @@ class ImportExpenseViewModel(application: Application) : AndroidViewModel(applic
         }
     }
 
-    /**
-     * 重置状态
-     */
     fun reset() {
         _importResult.value = null
         _progress.value = 0
@@ -233,34 +181,3 @@ class ImportExpenseViewModel(application: Application) : AndroidViewModel(applic
         isCancelled = false
     }
 }
-
-/**
- * 导入文件状态（UI 展示用）
- */
-data class ImportFileItem(
-    val fileName: String,
-    val filePath: String,
-    val billMonth: Int,
-    val size: Long,
-    var status: ImportFileStatus = ImportFileStatus.PENDING,
-    var recordCount: Int = 0,
-    var errorMessage: String? = null
-)
-
-enum class ImportFileStatus {
-    PENDING, SUCCESS, FAILED, SKIPPED
-}
-
-data class ImportFileDetail(
-    val fileName: String,
-    val status: ImportFileStatus,
-    val recordCount: Int,
-    val errorMessage: String?
-)
-
-data class ImportSummary(
-    val successCount: Int,
-    val failedCount: Int,
-    val skippedCount: Int,
-    val details: List<ImportFileDetail>
-)

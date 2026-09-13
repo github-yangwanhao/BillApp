@@ -42,6 +42,8 @@ class ConsumeBillViewModel(application: Application) : AndroidViewModel(applicat
 
     private val _monthSummary = MutableLiveData<MonthSummary?>(null)
     val monthSummary: LiveData<MonthSummary?> = _monthSummary
+    // 🔥 分页加载锁：防止并发请求导致数据重复
+    private var isLoadingNextPage = false
 
     /**
      * 加载某个月的汇总数据
@@ -60,15 +62,18 @@ class ConsumeBillViewModel(application: Application) : AndroidViewModel(applicat
     fun loadFirstPage() {
         currentPage = 0
         isAllLoaded = false
+        isLoadingNextPage = false
         _rawBills.clear()
         _adapterItems.value = null
         loadNextPage()
     }
 
     fun loadNextPage() {
-        if (isAllLoaded) return
+        if (isAllLoaded || isLoadingNextPage) return
 
+        isLoadingNextPage = true
         _isLoadingMore.value = true
+
         viewModelScope.launch {
             try {
                 val offset = currentPage * pageSize
@@ -93,6 +98,7 @@ class ConsumeBillViewModel(application: Application) : AndroidViewModel(applicat
                 e.printStackTrace()
                 _adapterItems.postValue(emptyList())
             } finally {
+                isLoadingNextPage = false
                 _isLoadingMore.value = false
             }
         }

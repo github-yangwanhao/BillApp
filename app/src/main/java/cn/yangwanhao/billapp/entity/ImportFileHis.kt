@@ -24,6 +24,9 @@ data class ImportFileHis(
     @ColumnInfo(name = "FILE_MD5")
     val fileMd5: String,
 
+    @ColumnInfo(name = "IMPORT_TYPE", defaultValue = "EXPENSE")
+    val importType: String = "EXPENSE",
+
     /** "S"-成功 或 "F"-失败 */
     @ColumnInfo(name = "STATUS")
     val status: String,

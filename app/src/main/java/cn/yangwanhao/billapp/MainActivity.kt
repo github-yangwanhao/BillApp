@@ -4,17 +4,14 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.NavController
+import androidx.navigation.NavOptions
 import androidx.navigation.fragment.NavHostFragment
 import cn.yangwanhao.billapp.databinding.ActivityMainBinding
-import cn.yangwanhao.billapp.ui.home.HomeFragment
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     lateinit var navController: NavController
-
-    // 持有 HomeFragment 引用，用于切换 ViewPager2
-    var homeFragment: HomeFragment? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,29 +23,44 @@ class MainActivity : AppCompatActivity() {
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHostFragment.navController
 
-        // 🔥 底部导航栏点击事件：控制 ViewPager2 切换
+        // 🔥 底部导航点击：使用 Navigation 切换顶级 Fragment
         binding.bottomNavView.setOnItemSelectedListener { menuItem ->
-            when (menuItem.itemId) {
-                R.id.nav_home -> {
-                    homeFragment?.setCurrentTab(0)
-                    true
-                }
-                R.id.nav_stats -> {
-                    homeFragment?.setCurrentTab(1)
-                    true
-                }
-                R.id.nav_profile -> {
-                    homeFragment?.setCurrentTab(2)
-                    true
-                }
-                else -> false
+            val targetId = when (menuItem.itemId) {
+                R.id.nav_home -> R.id.homeFragment
+                R.id.nav_stats -> R.id.statsFragment
+                R.id.nav_profile -> R.id.profileFragment
+                else -> return@setOnItemSelectedListener false
             }
+
+            // 如果已经在目标页，不重复导航
+            if (navController.currentDestination?.id == targetId) {
+                return@setOnItemSelectedListener true
+            }
+
+            val navOptions = NavOptions.Builder()
+                .setLaunchSingleTop(true)
+                .setPopUpTo(navController.graph.startDestinationId, false, true)
+                .build()
+            navController.navigate(targetId, null, navOptions)
+            true
         }
 
-        // 监听目的地变化：进入导入页面时隐藏底部导航栏
+        // 监听目的地变化：同步底部导航高亮 + 控制显隐
         navController.addOnDestinationChangedListener { _, destination, _ ->
+            // 同步高亮
+            val selectedMenuId = when (destination.id) {
+                R.id.homeFragment -> R.id.nav_home
+                R.id.statsFragment -> R.id.nav_stats
+                R.id.profileFragment -> R.id.nav_profile
+                else -> null
+            }
+            if (selectedMenuId != null && binding.bottomNavView.selectedItemId != selectedMenuId) {
+                binding.bottomNavView.selectedItemId = selectedMenuId
+            }
+
+            // 进入导入页面时隐藏底部导航栏
             when (destination.id) {
-                R.id.importMainFragment, R.id.importExpenseFragment -> {
+                R.id.importMainFragment, R.id.importExpenseFragment, R.id.importIncomeFragment -> {
                     binding.bottomNavView.visibility = View.GONE
                 }
                 else -> {

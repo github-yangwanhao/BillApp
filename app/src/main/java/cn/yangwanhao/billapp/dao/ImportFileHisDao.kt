@@ -13,7 +13,8 @@ interface ImportFileHisDao {
     suspend fun insert(record: ImportFileHis): Long
 
     /** 根据MD5查询，用于判断文件是否已导入过 */
-    @Query("SELECT * FROM import_file_his WHERE FILE_MD5 = :md5 LIMIT 1")
-    suspend fun getByMd5(md5: String): ImportFileHis?
+    /** 🔥 按 MD5 + 导入类型 查询，避免支出/收入互相误判 */
+    @Query("SELECT * FROM import_file_his WHERE FILE_MD5 = :md5 AND IMPORT_TYPE = :importType LIMIT 1")
+    suspend fun getByMd5AndType(md5: String, importType: String): ImportFileHis?
 
 }

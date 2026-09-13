@@ -44,7 +44,7 @@ class ImportService(
 
         // 2. 计算 MD5，检查是否已导入
         val md5 = FileUtils.getFileMd5(file)
-        val existingRecord = importFileHisRepository.getByMd5(md5)
+        val existingRecord = importFileHisRepository.getByMd5AndType(md5, ImportConstants.IMPORT_TYPE_EXPENSE)
         if (existingRecord != null) {
             return ImportResult.AlreadyImported(md5)
         }
@@ -120,6 +120,7 @@ class ImportService(
                     fileName = fileName,
                     fileRow = billDataList.size,
                     fileMd5 = md5,
+                    importType = ImportConstants.IMPORT_TYPE_EXPENSE,
                     status = ImportConstants.STATUS_SUCCESS,
                     createTime = now,
                     updateTime = now

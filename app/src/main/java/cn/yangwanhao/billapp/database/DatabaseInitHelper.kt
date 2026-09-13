@@ -45,7 +45,7 @@ class DatabaseInitHelper(
             dictDao.insertAll(consumeDictList)
 
             // 2. 默认收入分类
-            val incomeCategories = listOf("工资", "奖金", "兼职", "理财", "礼金", "其他")
+            val incomeCategories = listOf("工资", "奖金", "补贴", "兼职", "理财", "礼金", "其他")
             val incomeDictList = incomeCategories.mapIndexed { index, value ->
                 Dict(
                     dictKey = Constant.DICT_KEY_INCOME_CATEGORY,

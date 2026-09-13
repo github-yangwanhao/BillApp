@@ -1,15 +1,14 @@
 package cn.yangwanhao.billapp.ui.home
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.widget.ViewPager2
-import cn.yangwanhao.billapp.MainActivity
 import cn.yangwanhao.billapp.databinding.FragmentHomeBinding
 import cn.yangwanhao.billapp.ui.home.add.AddExpenseDialogFragment
 import cn.yangwanhao.billapp.ui.home.add.IncomeAddDialogFragment
@@ -26,7 +25,7 @@ class HomeFragment : Fragment() {
     val consumeViewModel: ConsumeBillViewModel by viewModels()
     val incomeViewModel: IncomeBillViewModel by viewModels()
 
-    private var currentTab = 0  // 0=支出, 1=收入
+    private var currentTab = 0
 
     private val currentMonth: Int
         get() {
@@ -44,17 +43,15 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        (activity as? MainActivity)?.homeFragment = this
-
         setupViewPager()
         setupTabToggle()
         setupObservers()
-        setupFab()
-        loadStats()
+        updateFabStyle(0)   // 默认显示支出卡片
+        loadStats()          // 加载支出统计
     }
 
     // ============================================================
-    // ViewPager2 设置
+    // ViewPager2
     // ============================================================
     private fun setupViewPager() {
         val adapter = HomeViewPagerAdapter(this)
@@ -71,30 +68,19 @@ class HomeFragment : Fragment() {
     }
 
     private fun setupTabToggle() {
-        // 默认选中支出
         updateTabSelection(0)
-
-        // 点击支出按钮 → 切换到支出
         binding.homeTabExpense.setOnClickListener {
             binding.homeViewPager.currentItem = 0
         }
-
-        // 点击收入按钮 → 切换到收入
         binding.homeTabIncome.setOnClickListener {
             binding.homeViewPager.currentItem = 1
         }
     }
 
-    /**
-     * 更新 Tab 样式（完全手动控制）
-     * @param position 0=支出, 1=收入
-     */
     private fun updateTabSelection(position: Int) {
         val isExpense = position == 0
 
-        // 支出按钮
         binding.homeTabExpense.apply {
-            // 设置背景色（直接使用 ColorStateList）
             backgroundTintList = android.content.res.ColorStateList.valueOf(
                 if (isExpense) android.graphics.Color.WHITE else android.graphics.Color.TRANSPARENT
             )
@@ -103,8 +89,6 @@ class HomeFragment : Fragment() {
                 else android.graphics.Color.parseColor("#868E96")
             )
         }
-
-        // 收入按钮
         binding.homeTabIncome.apply {
             backgroundTintList = android.content.res.ColorStateList.valueOf(
                 if (!isExpense) android.graphics.Color.WHITE else android.graphics.Color.TRANSPARENT
@@ -115,22 +99,33 @@ class HomeFragment : Fragment() {
             )
         }
     }
+
     // ============================================================
-    // 数据观察 & 统计加载
+    // 数据观察
     // ============================================================
     private fun setupObservers() {
+        // 支出列表变化时刷新支出统计
         consumeViewModel.adapterItems.observe(viewLifecycleOwner) {
             loadStats()
         }
 
+        // 收入统计 LiveData（由 HomeFragment 统一更新顶部卡片）
+        incomeViewModel.monthlyTotal.observe(viewLifecycleOwner) { updateIncomeStatsUI() }
+        incomeViewModel.monthlyCount.observe(viewLifecycleOwner) { updateIncomeStatsUI() }
+        incomeViewModel.crossMonthCount.observe(viewLifecycleOwner) { updateIncomeStatsUI() }
+
+        // 收入列表刷新后触发一次统计刷新
         incomeViewModel.adapterItems.observe(viewLifecycleOwner) {
-            // 收入列表更新时，如果当前是收入 Tab，可刷新统计
+            incomeViewModel.loadMonthStats(currentMonth)
         }
 
         consumeViewModel.loadFirstPage()
         incomeViewModel.loadFirstPage()
     }
 
+    // ============================================================
+    // 统计 UI 更新
+    // ============================================================
     private fun loadStats() {
         lifecycleScope.launch {
             try {
@@ -148,28 +143,62 @@ class HomeFragment : Fragment() {
         }
     }
 
-    // ============================================================
-    // FAB 按钮
-    // ============================================================
-    private fun setupFab() {
-        binding.homeFabAdd.setOnClickListener {
-            val dialog = AddExpenseDialogFragment()
-            dialog.setOnSaveSuccessListener {
-                when (binding.homeViewPager.currentItem) {
-                    0 -> {
-                        consumeViewModel.refresh()
-                        loadStats()
-                    }
-                    1 -> incomeViewModel.refresh()
-                }
-                Toast.makeText(requireContext(), "账单已更新", Toast.LENGTH_SHORT).show()
-            }
-            dialog.show(childFragmentManager, "AddExpenseDialog")
-        }
+    @SuppressLint("SetTextI18n")
+    private fun updateIncomeStatsUI() {
+        val total = incomeViewModel.monthlyTotal.value ?: 0
+        val count = incomeViewModel.monthlyCount.value ?: 0
+
+        val yuan = total / 100.0
+        binding.homeIncomeStatsAmount.text = "¥${String.format("%.2f", yuan)}"
+        binding.homeIncomeStatsBadge.text = "共 $count 笔"
     }
 
     // ============================================================
-    // 供外部调用
+    // FAB 与卡片切换
+    // ============================================================
+    private fun updateFabStyle(position: Int) {
+        val fab = binding.homeFabAdd
+        if (position == 0) {
+            // 支出
+            fab.backgroundTintList = android.content.res.ColorStateList.valueOf(
+                android.graphics.Color.parseColor("#D32F2F")
+            )
+            fab.setOnClickListener { showExpenseDialog() }
+            binding.homeStatsCard.visibility = View.VISIBLE
+            binding.homeStatsCardIncome.visibility = View.GONE
+        } else {
+            // 收入
+            fab.backgroundTintList = android.content.res.ColorStateList.valueOf(
+                android.graphics.Color.parseColor("#2B8A3E")
+            )
+            fab.setOnClickListener { showIncomeDialog() }
+            binding.homeStatsCard.visibility = View.GONE
+            binding.homeStatsCardIncome.visibility = View.VISIBLE
+            // 切到收入时刷新收入统计
+            incomeViewModel.loadMonthStats(currentMonth)
+        }
+    }
+
+    private fun showExpenseDialog() {
+        val dialog = AddExpenseDialogFragment()
+        dialog.setOnSaveSuccessListener {
+            consumeViewModel.refresh()
+            loadStats()
+        }
+        dialog.show(childFragmentManager, "AddExpenseDialog")
+    }
+
+    private fun showIncomeDialog() {
+        val dialog = IncomeAddDialogFragment()
+        dialog.setOnSaveSuccessListener {
+            incomeViewModel.refresh()
+            incomeViewModel.loadMonthStats(currentMonth)
+        }
+        dialog.show(childFragmentManager, "IncomeAddDialog")
+    }
+
+    // ============================================================
+    // 供子 Fragment 调用
     // ============================================================
     fun refreshConsume() {
         consumeViewModel.refresh()
@@ -180,13 +209,9 @@ class HomeFragment : Fragment() {
         incomeViewModel.refresh()
     }
 
-    fun loadMoreConsume() {
-        consumeViewModel.loadNextPage()
-    }
+    fun loadMoreConsume() = consumeViewModel.loadNextPage()
 
-    fun loadMoreIncome() {
-        incomeViewModel.loadNextPage()
-    }
+    fun loadMoreIncome() = incomeViewModel.loadNextPage()
 
     fun deleteConsumeBill(billId: Long) {
         consumeViewModel.deleteBill(billId)
@@ -204,46 +229,6 @@ class HomeFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        (activity as? MainActivity)?.homeFragment = null
         _binding = null
-    }
-
-    private fun updateFabStyle(position: Int) {
-        val fab = binding.homeFabAdd
-        if (position == 0) {
-            // 支出：红色
-            fab.backgroundTintList = android.content.res.ColorStateList.valueOf(
-                android.graphics.Color.parseColor("#D32F2F")
-            )
-            fab.setOnClickListener { showExpenseDialog() }
-            binding.homeStatsCard.visibility = View.VISIBLE
-            fab.visibility = View.VISIBLE
-        } else {
-            // 收入：绿色
-            fab.backgroundTintList = android.content.res.ColorStateList.valueOf(
-                android.graphics.Color.parseColor("#2B8A3E")
-            )
-            fab.setOnClickListener { showIncomeDialog() }
-            binding.homeStatsCard.visibility = View.GONE
-            fab.visibility = View.VISIBLE
-        }
-    }
-
-    private fun showExpenseDialog() {
-        val dialog = AddExpenseDialogFragment()
-        dialog.setOnSaveSuccessListener {
-            consumeViewModel.refresh()
-            loadStats()
-        }
-        dialog.show(childFragmentManager, "AddExpenseDialog")
-    }
-
-    private fun showIncomeDialog() {
-        val dialog = IncomeAddDialogFragment()
-        dialog.setOnSaveSuccessListener {
-            incomeViewModel.refresh()
-            // 收入统计暂未实现，可留空
-        }
-        dialog.show(childFragmentManager, "IncomeAddDialog")
     }
 }

@@ -113,7 +113,7 @@
 
     </LinearLayout>
 
-    <!-- ========== 收入导入按钮（暂未开放） ========== -->
+    <!-- ========== 收入导入按钮 ========== -->
     <LinearLayout
         android:id="@+id/btnIncomeImport"
         android:layout_width="match_parent"
@@ -124,7 +124,6 @@
         android:gravity="center_vertical"
         android:clickable="true"
         android:focusable="true"
-        android:alpha="0.5"
         android:layout_marginBottom="16dp">
 
         <TextView
@@ -152,7 +151,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="即将开放，敬请期待"
+                android:text="导入 Excel 账单数据（收入）"
                 android:textSize="13sp"
                 android:textColor="#999999"
                 android:layout_marginTop="4dp" />
@@ -161,8 +160,9 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="🔒"
-            android:textSize="20sp" />
+            android:text="›"
+            android:textSize="28sp"
+            android:textColor="#CCCCCC" />
 
     </LinearLayout>
 

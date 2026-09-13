@@ -16,65 +16,48 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import cn.yangwanhao.billapp.databinding.FragmentImportExpenseBinding
+import cn.yangwanhao.billapp.databinding.FragmentImportIncomeBinding
 import cn.yangwanhao.billapp.ui.adapter.ImportFileAdapter
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.suspendCancellableCoroutine
 import java.io.File
-import kotlin.coroutines.resume
 
-class ImportExpenseFragment : Fragment() {
+class ImportIncomeFragment : Fragment() {
 
-    private var _binding: FragmentImportExpenseBinding? = null
+    private var _binding: FragmentImportIncomeBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: ImportExpenseViewModel by viewModels()
-    private val adapter = ImportFileAdapter { _ ->
-        // 点击文件可查看详情（可选）
-    }
+    private val viewModel: ImportIncomeViewModel by viewModels()
+    private val adapter = ImportFileAdapter { }
 
-    // 文件选择器
     private val filePickerLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
-            val data: Intent? = result.data
-            val uri = data?.data
-            uri?.let { handleFileUri(it) }
+            result.data?.data?.let { handleFileUri(it) }
         }
     }
 
-    // 文件夹选择器（使用 SAF）
     private val folderPickerLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
-            val data: Intent? = result.data
-            val uri = data?.data
-            uri?.let { handleFolderUri(it) }
+            result.data?.data?.let { handleFolderUri(it) }
         }
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentImportExpenseBinding.inflate(inflater, container, false)
+        _binding = FragmentImportIncomeBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        setupRecyclerView()
-        setupObservers()
-        setupListeners()
-    }
-
-    private fun setupRecyclerView() {
         binding.rvImportFiles.layoutManager = LinearLayoutManager(context)
         binding.rvImportFiles.adapter = adapter
+        setupObservers()
+        setupListeners()
     }
 
     @SuppressLint("SetTextI18n")
@@ -83,13 +66,10 @@ class ImportExpenseFragment : Fragment() {
             adapter.submitList(items)
             binding.tvFileCount.text = "${items.size} 个文件"
             binding.tvClearAll.visibility = if (items.isNotEmpty()) View.VISIBLE else View.GONE
-
-            // 更新按钮状态
             val hasPending = items.any { it.status == ImportFileStatus.PENDING }
             binding.btnStartImport.isEnabled = hasPending && !viewModel.isImporting.value!!
             binding.btnStartImport.alpha = if (hasPending && !viewModel.isImporting.value!!) 1.0f else 0.5f
         }
-
         viewModel.isImporting.observe(viewLifecycleOwner) { isImporting ->
             binding.btnStartImport.isEnabled = !isImporting
             binding.btnStartImport.text = if (isImporting) "导入中..." else "开始导入"
@@ -98,34 +78,25 @@ class ImportExpenseFragment : Fragment() {
             binding.layoutProgress.visibility = if (isImporting) View.VISIBLE else View.GONE
             binding.btnCancelImport.visibility = if (isImporting) View.VISIBLE else View.GONE
         }
-
-        viewModel.progress.observe(viewLifecycleOwner) { progress ->
-            binding.progressBar.progress = progress
-            binding.tvProgressPercent.text = "$progress%"
+        viewModel.progress.observe(viewLifecycleOwner) {
+            binding.progressBar.progress = it
+            binding.tvProgressPercent.text = "$it%"
         }
-
-        viewModel.progressText.observe(viewLifecycleOwner) { text ->
-            binding.tvProgressText.text = text
+        viewModel.progressText.observe(viewLifecycleOwner) {
+            binding.tvProgressText.text = it
         }
-
-        viewModel.toastMessage.observe(viewLifecycleOwner) { msg ->
-            Toast.makeText(requireContext(), msg, Toast.LENGTH_LONG).show()
+        viewModel.toastMessage.observe(viewLifecycleOwner) {
+            Toast.makeText(requireContext(), it, Toast.LENGTH_LONG).show()
         }
-
         viewModel.importResult.observe(viewLifecycleOwner) { result ->
-            if (result != null) {
-                showImportResultDialog(result)
-            }
+            result?.let { showImportResultDialog(it) }
         }
     }
 
     private fun setupListeners() {
-        // 返回
         binding.tvBack.setOnClickListener {
             requireActivity().onBackPressedDispatcher.onBackPressed()
         }
-
-        // 选择文件
         binding.btnSelectFile.setOnClickListener {
             val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
                 addCategory(Intent.CATEGORY_OPENABLE)
@@ -137,92 +108,78 @@ class ImportExpenseFragment : Fragment() {
             }
             filePickerLauncher.launch(intent)
         }
-
-        // 选择文件夹
         binding.btnSelectFolder.setOnClickListener {
-            val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
-            folderPickerLauncher.launch(intent)
+            folderPickerLauncher.launch(Intent(Intent.ACTION_OPEN_DOCUMENT_TREE))
         }
-
-        // 清空列表
         binding.tvClearAll.setOnClickListener {
             AlertDialog.Builder(requireContext())
                 .setTitle("清空列表")
                 .setMessage("确定要清空所有待导入文件吗？")
-                .setPositiveButton("清空") { _, _ ->
-                    viewModel.clearFiles()
-                }
+                .setPositiveButton("清空") { _, _ -> viewModel.clearFiles() }
                 .setNegativeButton("取消", null)
                 .show()
         }
-
-        // 取消导入
         binding.btnCancelImport.setOnClickListener {
             AlertDialog.Builder(requireContext())
                 .setTitle("取消导入")
                 .setMessage("确定要取消当前导入吗？")
-                .setPositiveButton("确定取消") { _, _ ->
-                    viewModel.cancelImport()
-                }
+                .setPositiveButton("确定取消") { _, _ -> viewModel.cancelImport() }
                 .setNegativeButton("继续导入", null)
                 .show()
         }
-
-        // 开始导入
         binding.btnStartImport.setOnClickListener {
             binding.btnStartImport.isEnabled = false
             startImport()
         }
     }
 
+    private fun startImport() {
+        val fileList = viewModel.files.value ?: emptyList()
+        if (fileList.isEmpty()) {
+            Toast.makeText(requireContext(), "请先选择文件", Toast.LENGTH_SHORT).show()
+            return
+        }
+        if (fileList.none { it.status == ImportFileStatus.PENDING }) {
+            Toast.makeText(requireContext(), "没有待导入的文件", Toast.LENGTH_SHORT).show()
+            return
+        }
+        lifecycleScope.launch {
+            viewModel.startImport()
+        }
+    }
+
     private fun handleFileUri(uri: Uri) {
         try {
-            // 从 Uri 读取文件内容，复制到 App 私有缓存目录
-            val fileName = getFileNameFromUri(uri)
-            if (fileName == null) {
+            val fileName = getFileNameFromUri(uri) ?: run {
                 Toast.makeText(requireContext(), "无法获取文件名", Toast.LENGTH_SHORT).show()
                 return
             }
-
-            // 检查文件名是否符合 yyyy-MM.xlsx 或 yyyy-MM.xls 格式
-            if (!fileName.matches(Regex("""^\d{4}-\d{2}\.(xlsx|xls)$"""))) {
-                Toast.makeText(requireContext(), "文件名格式不正确，应为 yyyy-MM.xlsx 或 yyyy-MM.xls", Toast.LENGTH_SHORT).show()
+            // 收入导入只检查扩展名
+            if (!fileName.endsWith(".xlsx", true) && !fileName.endsWith(".xls", true)) {
+                Toast.makeText(requireContext(), "请选择 Excel 文件", Toast.LENGTH_SHORT).show()
                 return
             }
-
-            // 将 Uri 内容复制到缓存目录
             val cacheFile = File(requireContext().cacheDir, fileName)
             requireContext().contentResolver.openInputStream(uri)?.use { input ->
-                cacheFile.outputStream().use { output ->
-                    input.copyTo(output)
-                }
+                cacheFile.outputStream().use { output -> input.copyTo(output) }
             }
-
             if (cacheFile.exists()) {
                 viewModel.addFiles(listOf(cacheFile))
-                Toast.makeText(requireContext(), "已添加文件：$fileName", Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(requireContext(), "文件读取失败", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "已添加：$fileName", Toast.LENGTH_SHORT).show()
             }
-
         } catch (e: Exception) {
             e.printStackTrace()
             Toast.makeText(requireContext(), "读取文件失败：${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
 
-    /**
-     * 从 Uri 获取文件名
-     */
     private fun getFileNameFromUri(uri: Uri): String? {
-        val cursor = requireContext().contentResolver.query(uri, null, null, null, null)
-        cursor?.use {
-            val nameIndex = it.getColumnIndex("_display_name")
-            if (nameIndex != -1 && it.moveToFirst()) {
-                return it.getString(nameIndex)
+        requireContext().contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+            val nameIndex = cursor.getColumnIndex("_display_name")
+            if (nameIndex != -1 && cursor.moveToFirst()) {
+                return cursor.getString(nameIndex)
             }
         }
-        // 如果查询失败，尝试从 Uri 路径中提取
         return uri.path?.substringAfterLast("/")
     }
 
@@ -230,10 +187,10 @@ class ImportExpenseFragment : Fragment() {
         try {
             val files = scanFolderForExcelFiles(uri)
             if (files.isEmpty()) {
-                Toast.makeText(requireContext(), "文件夹中没有符合条件的 Excel 文件", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "文件夹中没有 Excel 文件", Toast.LENGTH_SHORT).show()
             } else {
                 viewModel.addFiles(files)
-                Toast.makeText(requireContext(), "找到 ${files.size} 个 Excel 文件", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "找到 ${files.size} 个文件", Toast.LENGTH_SHORT).show()
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -241,27 +198,18 @@ class ImportExpenseFragment : Fragment() {
         }
     }
 
-    /**
-     * 扫描文件夹中的 Excel 文件
-     */
     private fun scanFolderForExcelFiles(uri: Uri): List<File> {
         val result = mutableListOf<File>()
-        val documentFile = DocumentFile.fromTreeUri(requireContext(), uri)
-        documentFile?.listFiles()?.forEach { doc ->
+        DocumentFile.fromTreeUri(requireContext(), uri)?.listFiles()?.forEach { doc ->
             if (doc.isFile) {
-                val fileName = doc.name ?: return@forEach
-                if (fileName.matches(Regex("""^\d{4}-\d{2}\.(xlsx|xls)$"""))) {
-                    // 读取文件内容并复制到缓存目录
+                val name = doc.name ?: return@forEach
+                if (name.endsWith(".xlsx", true) || name.endsWith(".xls", true)) {
                     try {
-                        val cacheFile = File(requireContext().cacheDir, fileName)
+                        val cacheFile = File(requireContext().cacheDir, name)
                         requireContext().contentResolver.openInputStream(doc.uri)?.use { input ->
-                            cacheFile.outputStream().use { output ->
-                                input.copyTo(output)
-                            }
+                            cacheFile.outputStream().use { output -> input.copyTo(output) }
                         }
-                        if (cacheFile.exists()) {
-                            result.add(cacheFile)
-                        }
+                        if (cacheFile.exists()) result.add(cacheFile)
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
@@ -271,15 +219,11 @@ class ImportExpenseFragment : Fragment() {
         return result
     }
 
-    /**
-     * 显示导入结果对话框
-     */
     private fun showImportResultDialog(result: ImportSummary) {
         val message = buildString {
             append("✅ 成功：${result.successCount} 个文件\n")
             append("❌ 失败：${result.failedCount} 个文件\n")
             append("⏭️ 跳过：${result.skippedCount} 个文件\n\n")
-            append("详细：\n")
             result.details.forEach { detail ->
                 val statusText = when (detail.status) {
                     ImportFileStatus.SUCCESS -> "✅ 成功 (${detail.recordCount}条)"
@@ -290,56 +234,11 @@ class ImportExpenseFragment : Fragment() {
                 append("  ${detail.fileName}: $statusText\n")
             }
         }
-
         AlertDialog.Builder(requireContext())
             .setTitle("导入完成")
             .setMessage(message)
-            .setPositiveButton("确定") { _, _ ->
-                viewModel.reset()
-            }
-            .setNegativeButton("查看详情") { _, _ ->
-                // 暂时不做更多操作
-            }
+            .setPositiveButton("确定") { _, _ -> viewModel.reset() }
             .show()
-    }
-
-    /**
-     * 开始导入，处理月份冲突
-     */
-    private fun startImport() {
-        val fileList = viewModel.files.value ?: emptyList()
-        if (fileList.isEmpty()) {
-            Toast.makeText(requireContext(), "请先选择文件", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        val pending = fileList.filter { it.status == ImportFileStatus.PENDING }
-        if (pending.isEmpty()) {
-            Toast.makeText(requireContext(), "没有待导入的文件", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        // 🔥 在协程中调用 ViewModel 的挂起方法
-        lifecycleScope.launch {
-            viewModel.startImport { billMonth, existingCount ->
-                // 将异步弹窗转为同步等待
-                suspendCancellableCoroutine { continuation ->
-                    AlertDialog.Builder(requireContext())
-                        .setTitle("月份冲突")
-                        .setMessage("${billMonth / 100}年${billMonth % 100}月已有 $existingCount 条账单记录，是否覆盖？")
-                        .setPositiveButton("覆盖") { _, _ ->
-                            continuation.resume(true)
-                        }
-                        .setNegativeButton("跳过") { _, _ ->
-                            continuation.resume(false)
-                        }
-                        .setOnCancelListener {
-                            continuation.resume(false)
-                        }
-                        .show()
-                }
-            }
-        }
     }
 
     override fun onDestroyView() {
