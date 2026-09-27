@@ -123,4 +123,12 @@ interface ConsumeBillDao {
     /** 🔥 全表最晚的 BILL_MONTH */
     @Query("SELECT MAX(BILL_MONTH) FROM consume_bill")
     suspend fun getMaxBillMonth(): Int?
+
+    /** 🔥 导出：某月全部支出（不分页，按日期升序） */
+    @Query("SELECT * FROM consume_bill WHERE BILL_MONTH = :billMonth ORDER BY PAY_DATE ASC, CREATE_TIME ASC")
+    suspend fun getAllByBillMonth(billMonth: Int): List<ConsumeBill>
+
+    /** 🔥 导出：所有有数据的月份，降序 */
+    @Query("SELECT DISTINCT BILL_MONTH FROM consume_bill ORDER BY BILL_MONTH DESC")
+    suspend fun getDistinctBillMonths(): List<Int>
 }

@@ -40,5 +40,11 @@ class ProfileFragment : Fragment() {
             // 使用 Navigation 跳转到导入主页面
             findNavController().navigate(R.id.importMainFragment)
         }
+
+        // 🔥 数据导出入口
+        val btnExport: View? = view.findViewById(R.id.btn_export_data)
+        btnExport?.setOnClickListener {
+            findNavController().navigate(R.id.exportFragment)
+        }
     }
 }

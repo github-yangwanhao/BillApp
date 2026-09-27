@@ -60,7 +60,8 @@ class MainActivity : AppCompatActivity() {
 
             // 进入导入页面时隐藏底部导航栏
             when (destination.id) {
-                R.id.importMainFragment, R.id.importExpenseFragment, R.id.importIncomeFragment -> {
+                R.id.importMainFragment, R.id.importExpenseFragment, R.id.importIncomeFragment,
+                R.id.exportFragment -> {
                     binding.bottomNavView.visibility = View.GONE
                 }
                 else -> {

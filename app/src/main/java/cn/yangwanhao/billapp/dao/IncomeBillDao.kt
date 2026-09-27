@@ -100,4 +100,8 @@ interface IncomeBillDao {
     /** 🔥 全表最晚的 BILL_MONTH */
     @Query("SELECT MAX(BILL_MONTH) FROM income_bill")
     suspend fun getMaxBillMonth(): Int?
+
+    /** 🔥 导出：全部收入（按年月升序、日期升序） */
+    @Query("SELECT * FROM income_bill ORDER BY BILL_MONTH ASC, POST_DATE ASC, CREATE_TIME ASC")
+    suspend fun getAllForExport(): List<IncomeBill>
 }

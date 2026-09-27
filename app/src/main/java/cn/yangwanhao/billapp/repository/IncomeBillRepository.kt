@@ -25,4 +25,7 @@ class IncomeBillRepository(
 
     suspend fun countCrossMonthByBillMonth(billMonth: Int): Int =
         incomeBillDao.countCrossMonthByBillMonth(billMonth)
+
+    suspend fun getAllForExport(): List<IncomeBill> =
+        incomeBillDao.getAllForExport()
 }

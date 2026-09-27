@@ -56,4 +56,10 @@ class ConsumeBillRepository(
     suspend fun getRecentMonths(limit: Int = 12): List<Int> {
         return consumeBillDao.getRecentMonths(limit)
     }
+
+    suspend fun getAllByBillMonth(billMonth: Int): List<ConsumeBill> =
+        consumeBillDao.getAllByBillMonth(billMonth)
+
+    suspend fun getDistinctBillMonths(): List<Int> =
+        consumeBillDao.getDistinctBillMonths()
 }

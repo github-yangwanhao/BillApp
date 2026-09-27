@@ -54,4 +54,10 @@
         android:label="收入导入"
         tools:layout="@layout/fragment_import_income" />
 
+    <fragment
+        android:id="@+id/exportFragment"
+        android:name="cn.yangwanhao.billapp.ui.profile.exports.ExportFragment"
+        android:label="数据导出"
+        tools:layout="@layout/fragment_export" />
+
 </navigation>
