@@ -5,14 +5,18 @@ import android.app.AlertDialog
 import android.app.Dialog
 import android.content.res.ColorStateList
 import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
+import android.view.Window
+import android.view.WindowManager
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.graphics.toColorInt
+import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import cn.yangwanhao.billapp.BillApplication
@@ -29,9 +33,6 @@ import cn.yangwanhao.billapp.ui.dialog.CustomDatePickerDialog
 import cn.yangwanhao.billapp.ui.dialog.MonthRangePickerDialog
 import cn.yangwanhao.billapp.utils.InstallmentCalculator
 import cn.yangwanhao.billapp.utils.InstallmentResult
-import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.google.android.material.bottomsheet.BottomSheetDialog
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -40,7 +41,7 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
-class AddExpenseDialogFragment : BottomSheetDialogFragment() {
+class AddExpenseDialogFragment : DialogFragment() {
 
     private var _binding: FragmentAddExpenseBinding? = null
     private val binding get() = _binding!!
@@ -69,8 +70,6 @@ class AddExpenseDialogFragment : BottomSheetDialogFragment() {
 
     private var onSaveSuccess: (() -> Unit)? = null
 
-    override fun getTheme(): Int = R.style.Theme_BillApp
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -96,19 +95,24 @@ class AddExpenseDialogFragment : BottomSheetDialogFragment() {
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val dialog = super.onCreateDialog(savedInstanceState) as BottomSheetDialog
-        dialog.setOnShowListener {
-            val bottomSheet = dialog.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
-            bottomSheet?.let {
-                val behavior = BottomSheetBehavior.from(it)
-                val maxHeight = (resources.displayMetrics.heightPixels * 0.8).toInt()
-                behavior.peekHeight = maxHeight
-                behavior.state = BottomSheetBehavior.STATE_EXPANDED
-                it.layoutParams.height = maxHeight
-                it.requestLayout()
-            }
-        }
+        val dialog = super.onCreateDialog(savedInstanceState)
+        dialog.window?.requestFeature(Window.FEATURE_NO_TITLE)
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.WHITE))
+        dialog.window?.setGravity(Gravity.TOP)
+        dialog.window?.setLayout(
+            WindowManager.LayoutParams.MATCH_PARENT,
+            WindowManager.LayoutParams.MATCH_PARENT
+        )
         return dialog
+    }
+
+    override fun onStart() {
+        super.onStart()
+        // 再次确保全屏（部分机型需要在 onStart 里再设一次）
+        dialog?.window?.setLayout(
+            WindowManager.LayoutParams.MATCH_PARENT,
+            WindowManager.LayoutParams.MATCH_PARENT
+        )
     }
 
     private fun initViews() {
@@ -188,6 +192,7 @@ class AddExpenseDialogFragment : BottomSheetDialogFragment() {
 
     private fun setupListeners() {
         binding.tvCancel.setOnClickListener { dismiss() }
+        binding.tvClose.setOnClickListener { dismiss() }
         binding.tvSave.setOnClickListener { saveBill() }
         binding.etDate.setOnClickListener { showDatePicker() }
         binding.etCategory.setOnClickListener { showCategoryPicker() }
@@ -318,7 +323,6 @@ class AddExpenseDialogFragment : BottomSheetDialogFragment() {
         binding.rvInstallmentPreview.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = installmentPreviewAdapter
-            // 保持默认嵌套滚动行为，配合 NestedScrollView 工作
         }
     }
 
@@ -330,8 +334,6 @@ class AddExpenseDialogFragment : BottomSheetDialogFragment() {
         binding.remarkLayout.visibility = View.VISIBLE
         binding.llRemarkTemplate.visibility = View.GONE
         binding.etRemark.setText(normalRemarkText)
-        // 如果希望切换时清空分期范围选择，可取消注释：
-        // binding.etMonthRangePicker.setText("请选择")
         currentInstallmentResult = null
     }
 
