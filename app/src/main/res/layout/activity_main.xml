@@ -3,7 +3,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="#F8F9FC"
+    android:id="@+id/rootLayout">
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/nav_host_fragment"
@@ -17,10 +19,17 @@
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_nav_view"
         android:layout_width="match_parent"
-        android:layout_height="72dp"
+        android:layout_height="88dp"
+        android:background="#FFFFFF"
+        app:elevation="8dp"
         app:menu="@menu/bottom_nav_menu"
-        app:itemIconSize="28dp"
+        app:itemIconSize="22dp"
+        app:itemIconTint="@color/bottom_nav_item_color"
+        app:itemTextColor="@color/bottom_nav_item_color"
+        app:labelVisibilityMode="labeled"
         app:itemTextAppearanceActive="@style/MyBottomNavText"
-        app:itemTextAppearanceInactive="@style/MyBottomNavText" />
+        app:itemTextAppearanceInactive="@style/MyBottomNavText"
+        app:itemPaddingTop="8dp"
+        app:itemPaddingBottom="10dp" />
 
 </LinearLayout>

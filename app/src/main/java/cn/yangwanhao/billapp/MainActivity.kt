@@ -3,6 +3,9 @@ package cn.yangwanhao.billapp
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.NavHostFragment
@@ -15,15 +18,33 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // 🔥 开启 edge-to-edge
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        // 🔥 根布局：只处理 top/left/right，不动 bottom
+        ViewCompat.setOnApplyWindowInsetsListener(binding.rootLayout) { v, insets ->
+            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(bars.left, bars.top, bars.right, 0)   // 🔥 bottom 传 0
+            insets
+        }
+
+        // 🔥 底部导航栏：单独处理 bottom，让背景延伸到底
+        ViewCompat.setOnApplyWindowInsetsListener(binding.bottomNavView) { v, insets ->
+            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(0, 0, 0, bars.bottom)
+            insets
+        }
 
         // 获取 NavController
         val navHostFragment = supportFragmentManager
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHostFragment.navController
 
-        // 🔥 底部导航点击：使用 Navigation 切换顶级 Fragment
+        // 底部导航点击：使用 Navigation 切换顶级 Fragment
         binding.bottomNavView.setOnItemSelectedListener { menuItem ->
             val targetId = when (menuItem.itemId) {
                 R.id.nav_home -> R.id.homeFragment
@@ -32,7 +53,6 @@ class MainActivity : AppCompatActivity() {
                 else -> return@setOnItemSelectedListener false
             }
 
-            // 如果已经在目标页，不重复导航
             if (navController.currentDestination?.id == targetId) {
                 return@setOnItemSelectedListener true
             }
@@ -47,7 +67,6 @@ class MainActivity : AppCompatActivity() {
 
         // 监听目的地变化：同步底部导航高亮 + 控制显隐
         navController.addOnDestinationChangedListener { _, destination, _ ->
-            // 同步高亮
             val selectedMenuId = when (destination.id) {
                 R.id.homeFragment -> R.id.nav_home
                 R.id.statsFragment -> R.id.nav_stats
@@ -58,7 +77,6 @@ class MainActivity : AppCompatActivity() {
                 binding.bottomNavView.selectedItemId = selectedMenuId
             }
 
-            // 进入导入页面时隐藏底部导航栏
             when (destination.id) {
                 R.id.importMainFragment, R.id.importExpenseFragment, R.id.importIncomeFragment,
                 R.id.exportFragment -> {

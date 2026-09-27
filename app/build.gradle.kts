@@ -38,6 +38,26 @@ android {
     kotlinOptions {
         jvmTarget = "17"
     }
+
+    signingConfigs {
+        create("release") {
+            storeFile = file("D:\\账单\\app\\billapp.jks")  // 你的路径
+            storePassword = "123456"
+            keyAlias = "billapp"
+            keyPassword = "123456"
+        }
+    }
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+            // 🔥 新增：使用签名配置
+            signingConfig = signingConfigs.getByName("release")
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
+    }
 }
 
 dependencies {

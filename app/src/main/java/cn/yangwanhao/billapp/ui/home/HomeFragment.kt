@@ -85,7 +85,7 @@ class HomeFragment : Fragment() {
                 if (isExpense) android.graphics.Color.WHITE else android.graphics.Color.TRANSPARENT
             )
             setTextColor(
-                if (isExpense) android.graphics.Color.parseColor("#6366F1")
+                if (isExpense) android.graphics.Color.parseColor("#2D6A4F")
                 else android.graphics.Color.parseColor("#868E96")
             )
         }
@@ -94,7 +94,7 @@ class HomeFragment : Fragment() {
                 if (!isExpense) android.graphics.Color.WHITE else android.graphics.Color.TRANSPARENT
             )
             setTextColor(
-                if (!isExpense) android.graphics.Color.parseColor("#6366F1")
+                if (!isExpense) android.graphics.Color.parseColor("#2D6A4F")
                 else android.graphics.Color.parseColor("#868E96")
             )
         }

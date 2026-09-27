@@ -9,19 +9,21 @@
     <color name="colorCancel">#E8F5E9</color>
     <color name="day_text_normal">#333333</color>
 
-    <!-- ===== 紫色系主色（新增） ===== -->
-    <color name="pub_primary">#6366F1</color>
-    <color name="pub_primary_dark">#4F46E5</color>
-    <color name="pub_primary_light">#818CF8</color>
-    <color name="pub_primary_gradient_start">#6366F1</color>
-    <color name="pub_primary_gradient_end">#4F46E5</color>
-    <color name="pub_primary_surface">#EEF2FF</color>
+    <!-- ===== 主色（浅绿） ===== -->
+    <color name="pub_primary">#52B788</color>
+    <color name="pub_primary_dark">#40916C</color>
+    <color name="pub_primary_light">#74C69D</color>
+    <color name="pub_primary_gradient_start">#52B788</color>
+    <color name="pub_primary_gradient_end">#40916C</color>
+    <color name="pub_primary_surface">#D8F3DC</color>
+    <!-- Tab 文字用的深绿，保证对比度 -->
+    <color name="pub_primary_text">#2D6A4F</color>
 
     <!-- ===== 底部导航图标颜色 ===== -->
     <color name="pub_nav_icon_inactive">#ADB5BD</color>
-    <color name="pub_nav_icon_active">#6366F1</color>
+    <color name="pub_nav_icon_active">#52B788</color>
     <color name="pub_nav_text_inactive">#ADB5BD</color>
-    <color name="pub_nav_text_active">#6366F1</color>
+    <color name="pub_nav_text_active">#2D6A4F</color>
 
     <!-- ===== 账单列表颜色 ===== -->
     <color name="home_stats_bg">#FFFFFF</color>
