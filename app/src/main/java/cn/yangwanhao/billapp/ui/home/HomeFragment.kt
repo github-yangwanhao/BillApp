@@ -161,7 +161,7 @@ class HomeFragment : Fragment() {
         if (position == 0) {
             // 支出
             fab.backgroundTintList = android.content.res.ColorStateList.valueOf(
-                android.graphics.Color.parseColor("#D32F2F")
+                android.graphics.Color.parseColor("#FF922B")
             )
             fab.setOnClickListener { showExpenseDialog() }
             binding.homeStatsCard.visibility = View.VISIBLE
