@@ -2,10 +2,16 @@ package cn.yangwanhao.billapp.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import java.util.Date
 
-@Entity(tableName = "import_file_his")
+@Entity(
+    tableName = "import_file_his",
+    indices = [
+        Index(value = ["FILE_MD5", "IMPORT_TYPE"])
+    ]
+)
 data class ImportFileHis(
 
     @PrimaryKey(autoGenerate = true)

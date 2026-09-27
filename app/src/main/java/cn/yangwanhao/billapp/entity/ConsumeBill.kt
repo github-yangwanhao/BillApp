@@ -2,10 +2,19 @@ package cn.yangwanhao.billapp.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import java.util.Date
 
-@Entity(tableName = "consume_bill")
+@Entity(
+    tableName = "consume_bill",
+    indices = [
+        Index(value = ["BILL_MONTH"]),
+        Index(value = ["PAY_DATE"]),
+        Index(value = ["BILL_MONTH", "CATEGORY_ID"]),
+        Index(value = ["BILL_MONTH", "PAY_CHANNEL_ID"])
+    ]
+)
 data class ConsumeBill(
 
     @PrimaryKey(autoGenerate = true)

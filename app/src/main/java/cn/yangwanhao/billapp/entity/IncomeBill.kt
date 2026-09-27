@@ -2,10 +2,18 @@ package cn.yangwanhao.billapp.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import java.util.Date
 
-@Entity(tableName = "income_bill")
+@Entity(
+    tableName = "income_bill",
+    indices = [
+        Index(value = ["BILL_MONTH"]),
+        Index(value = ["POST_DATE"]),
+        Index(value = ["BILL_MONTH", "CATEGORY_ID"])
+    ]
+)
 data class IncomeBill(
 
     @PrimaryKey(autoGenerate = true)
