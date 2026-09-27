@@ -73,4 +73,7 @@ dependencies {
     implementation("androidx.navigation:navigation-ui-ktx:2.7.7")
 
     implementation("com.google.android.flexbox:flexbox:3.0.0")
+
+    // 🔥 新增：折线图库
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
 }

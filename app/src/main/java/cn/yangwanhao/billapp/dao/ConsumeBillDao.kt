@@ -48,4 +48,79 @@ interface ConsumeBillDao {
     @Query("SELECT DISTINCT BILL_MONTH FROM consume_bill ORDER BY BILL_MONTH DESC LIMIT :limit")
     suspend fun getRecentMonths(limit: Int = 12): List<Int>
 
+    // ==================== 🔥 统计相关 ====================
+
+    /** 区间内支出总额 */
+    @Query("SELECT COALESCE(SUM(AMOUNT), 0) FROM consume_bill WHERE BILL_MONTH BETWEEN :start AND :end")
+    suspend fun sumByRange(start: Int, end: Int): Int
+
+    /** 区间内支出笔数 */
+    @Query("SELECT COUNT(*) FROM consume_bill WHERE BILL_MONTH BETWEEN :start AND :end")
+    suspend fun countByRange(start: Int, end: Int): Int
+
+    /** 区间内按 BILL_MONTH 分月聚合（用于年度折线图，X 轴 = 月） */
+    @Query("""
+        SELECT BILL_MONTH AS period, COALESCE(SUM(AMOUNT), 0) AS total
+        FROM consume_bill
+        WHERE BILL_MONTH BETWEEN :start AND :end
+        GROUP BY BILL_MONTH
+        ORDER BY BILL_MONTH
+    """)
+    suspend fun sumGroupByBillMonth(start: Int, end: Int): List<PeriodSum>
+
+    /** 区间内按 POST_DATE 的「日」聚合（用于月度折线图，X 轴 = 日） */
+    @Query("""
+        SELECT PAY_DATE AS period, COALESCE(SUM(AMOUNT), 0) AS total
+        FROM consume_bill
+        WHERE BILL_MONTH BETWEEN :start AND :end
+        GROUP BY PAY_DATE
+        ORDER BY PAY_DATE
+    """)
+    suspend fun sumGroupByPostDate(start: Int, end: Int): List<PeriodSum>
+
+    /** 汇总模式：按年聚合（BILL_MONTH / 100） */
+    @Query("""
+        SELECT BILL_MONTH / 100 AS period, COALESCE(SUM(AMOUNT), 0) AS total
+        FROM consume_bill
+        GROUP BY BILL_MONTH / 100
+        ORDER BY period
+    """)
+    suspend fun sumGroupByYear(): List<PeriodSum>
+
+    /** 区间内按分类聚合（分类排行） */
+    @Query("""
+        SELECT CATEGORY_ID AS categoryId, COALESCE(SUM(AMOUNT), 0) AS total
+        FROM consume_bill
+        WHERE BILL_MONTH BETWEEN :start AND :end
+        GROUP BY CATEGORY_ID
+        ORDER BY total DESC
+    """)
+    suspend fun sumGroupByCategory(start: Int, end: Int): List<CategorySumRaw>
+
+    /** 区间内按支付方式聚合 */
+    @Query("""
+        SELECT PAY_CHANNEL_ID AS channelId, COALESCE(SUM(AMOUNT), 0) AS total
+        FROM consume_bill
+        WHERE BILL_MONTH BETWEEN :start AND :end
+        GROUP BY PAY_CHANNEL_ID
+        ORDER BY total DESC
+    """)
+    suspend fun sumGroupByChannel(start: Int, end: Int): List<ChannelSumRaw>
+
+    /** 下钻：某个分类在区间内的所有明细 */
+    @Query("""
+        SELECT ID AS id, PAY_DATE AS date, REMARK AS remark, AMOUNT AS amount
+        FROM consume_bill
+        WHERE BILL_MONTH BETWEEN :start AND :end AND CATEGORY_ID = :categoryId
+        ORDER BY PAY_DATE DESC, CREATE_TIME DESC
+    """)
+    suspend fun drillByCategory(categoryId: Int, start: Int, end: Int): List<DrillItemRaw>
+
+    /** 🔥 全表最早的 BILL_MONTH */
+    @Query("SELECT MIN(BILL_MONTH) FROM consume_bill")
+    suspend fun getMinBillMonth(): Int?
+
+    /** 🔥 全表最晚的 BILL_MONTH */
+    @Query("SELECT MAX(BILL_MONTH) FROM consume_bill")
+    suspend fun getMaxBillMonth(): Int?
 }

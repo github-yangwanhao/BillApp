@@ -63,4 +63,24 @@ object CategoryIconHelper {
                 Pair(R.drawable.ic_income_other, 0xFF868E96.toInt())
         }
     }
+
+    /**
+     * 支付方式图标（含颜色）
+     */
+    fun getChannelIcon(channelName: String): Pair<Int, Int> {
+        return when {
+            channelName.contains("支付宝") ->
+                Pair(R.drawable.ic_channel_alipay, 0xFF1677FF.toInt())
+            channelName.contains("微信") ->
+                Pair(R.drawable.ic_channel_wechat, 0xFF07C160.toInt())
+            channelName.contains("信用卡") ->
+                Pair(R.drawable.ic_channel_credit, 0xFF845EF7.toInt())
+            channelName.contains("银行卡") ->
+                Pair(R.drawable.ic_channel_bank, 0xFF4DABF7.toInt())
+            channelName.contains("现金") ->
+                Pair(R.drawable.ic_channel_cash, 0xFF51CF66.toInt())
+            else ->
+                Pair(R.drawable.ic_channel_other, 0xFF868E96.toInt())
+        }
+    }
 }

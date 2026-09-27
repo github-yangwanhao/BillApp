@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingTop="11dp"
+    android:paddingBottom="11dp">
+
+    <!-- 日期 -->
+    <TextView
+        android:id="@+id/tvDrillDate"
+        android:layout_width="46dp"
+        android:layout_height="wrap_content"
+        android:textSize="12sp"
+        android:textColor="#ADB5BD"
+        android:fontFamily="monospace" />
+
+    <!-- 备注 -->
+    <TextView
+        android:id="@+id/tvDrillRemark"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:textSize="14sp"
+        android:textColor="#495057"
+        android:maxLines="1"
+        android:ellipsize="end" />
+
+    <!-- 金额 -->
+    <TextView
+        android:id="@+id/tvDrillAmount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:textColor="#1C1C1E"
+        android:fontFamily="monospace" />
+
+</LinearLayout>

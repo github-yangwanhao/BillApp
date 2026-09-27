@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/bg_bottom_sheet_top">
+
+    <!-- 拖拽条 -->
+    <View
+        android:layout_width="36dp"
+        android:layout_height="4dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/bg_sheet_handle" />
+
+    <!-- 头部 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="12dp">
+
+        <!-- 分类图标 -->
+        <ImageView
+            android:id="@+id/ivSheetIcon"
+            android:layout_width="38dp"
+            android:layout_height="38dp"
+            android:padding="9dp"
+            android:scaleType="center"
+            android:background="@drawable/pub_icon_bg"
+            android:layout_marginEnd="12dp" />
+
+        <!-- 分类名 + 期间 -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvSheetName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="分类名称"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="#1C1C1E" />
+
+            <TextView
+                android:id="@+id/tvSheetMeta"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="2026年9月 · 共 0 笔"
+                android:textSize="12sp"
+                android:textColor="#868E96" />
+        </LinearLayout>
+
+        <!-- 关闭按钮 -->
+        <TextView
+            android:id="@+id/btnSheetClose"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:background="@drawable/bg_sheet_close"
+            android:text="✕"
+            android:textSize="14sp"
+            android:textColor="#868E96"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true" />
+    </LinearLayout>
+
+    <!-- 分割线 -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#F0F0F5" />
+
+    <!-- 明细列表 -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvDrillList"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp"
+        android:minHeight="200dp" />
+
+    <!-- 底部合计栏 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingTop="14dp"
+        android:paddingBottom="20dp"
+        android:background="#FFFFFF">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="合计"
+            android:textSize="13sp"
+            android:textColor="#868E96" />
+
+        <TextView
+            android:id="@+id/tvSheetTotal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="¥0.00"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="#1C1C1E"
+            android:fontFamily="monospace" />
+    </LinearLayout>
+
+</LinearLayout>

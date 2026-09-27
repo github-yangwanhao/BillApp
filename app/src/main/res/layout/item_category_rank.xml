@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp"
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp"
+    android:background="?attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true">
+
+    <!-- 分类图标 -->
+    <ImageView
+        android:id="@+id/ivRankIcon"
+        android:layout_width="34dp"
+        android:layout_height="34dp"
+        android:padding="8dp"
+        android:scaleType="center"
+        android:background="@drawable/pub_icon_bg"
+        android:layout_marginEnd="12dp" />
+
+    <!-- 中间区域 -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <!-- 第一行：名称 + 金额 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="6dp">
+
+            <TextView
+                android:id="@+id/tvRankName"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="#1C1C1E"
+                android:maxLines="1"
+                android:ellipsize="end" />
+
+            <TextView
+                android:id="@+id/tvRankAmount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="#1C1C1E"
+                android:fontFamily="monospace" />
+        </LinearLayout>
+
+        <!-- 第二行：进度条 + 百分比 + 箭头 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <!-- 进度条背景 -->
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="5dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_progress_bg">
+
+                <View
+                    android:id="@+id/vProgressFill"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:background="#6366F1" />
+            </FrameLayout>
+
+            <TextView
+                android:id="@+id/tvRankPercent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="0%"
+                android:textSize="11sp"
+                android:textColor="#868E96"
+                android:minWidth="32dp"
+                android:gravity="end" />
+
+            <ImageView
+                android:layout_width="12dp"
+                android:layout_height="12dp"
+                android:layout_marginStart="4dp"
+                android:src="@drawable/ic_arrow_right"
+                android:alpha="0.4" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>
